@@ -1,6 +1,4 @@
 classdef E05_L <handle
-%The Gripper robot is made up of two seperate serial link arms,
-% 'left' and 'right'. 
  properties(Access = public)              
         model;
     end
