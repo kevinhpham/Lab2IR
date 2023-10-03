@@ -7,7 +7,7 @@ camlight
 fire = cell(10,10);
 for j = 1:5
     for i = 1:5
-        fire{j,i} = Fire_Extinguisher();
+        fire{j,i} = FireExtinguisher();
         fire{j,i}.move(transl(i,j,0));
     end
 end
