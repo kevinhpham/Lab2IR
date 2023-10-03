@@ -7,7 +7,7 @@ classdef FireExtinguisher < Item
         %This function constructs an 'FireExtinguisher' objects which inherits
         %functions and data fields from 'Item' class.
         function item = FireExtinguisher(baseTr) %change this to class name
-            plyName = 'FireExtinguisher.ply'; %change this to corresponding .ply file name
+            plyName = 'Fire_Extinguisher.ply'; %change this to corresponding .ply file name
             if nargin < 1
                 baseTr = eye(4);
             end
