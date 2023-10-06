@@ -11,6 +11,18 @@ classdef Item < handle
             %'baseTR' is relative to global frame of reference
             %item = '.ply'
             %baseTr = 4x4 homogenous transformation
+            
+            %try to use colored version of PLY file, If none exist use the
+            %none colored version
+            try
+                rmpath("PLYFILES\NoColored\")
+                addpath("PLYFILES\Colored\")
+                self.obj = PlaceObject(item);
+            catch
+                msg = "No colored file availiable. Proceeding to use none colored file."
+                warning(msg)
+                addpath("PLYFILES\NoColored\")
+            end
             if nargin < 2
                 baseTr = eye(4);
             end
