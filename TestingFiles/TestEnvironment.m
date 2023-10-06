@@ -63,22 +63,22 @@ tray4 = PlaceObject('Tray.PLY',[0.4,-0.2,0]);
 tray5 = PlaceObject('Tray.PLY',[1.4,-0.2,0]);
 tray6 = PlaceObject('Tray.PLY',[2.4,-0.2,0]);
 
-meal1 = PlaceObject('MealBox.PLY',[-2,-2,0]);
-meal2 = PlaceObject('MealBox.PLY',[-2,-2.2,0]);
-meal3 = PlaceObject('MealBox.PLY',[-2,-2.4,0]);
-meal4 = PlaceObject('MealBox.PLY',[-1,-2,0]);
-meal5 = PlaceObject('MealBox.PLY',[-1,-2.2,0]);
-meal6 = PlaceObject('MealBox.PLY',[-1,-2.4,0]);
-meal7 = PlaceObject('MealBox.PLY',[-3,-2,0]);
-meal8 = PlaceObject('MealBox.PLY',[-3,-2.2,0]);
-meal9 = PlaceObject('MealBox.PLY',[-3,-2.4,0]);
+meal1 = PlaceObject('MealBoxVego.PLY',[-2,-2,0]);
+meal2 = PlaceObject('MealBoxVego.PLY',[-2,-2.2,0]);
+meal3 = PlaceObject('MealBoxVego.PLY',[-2,-2.4,0]);
+meal4 = PlaceObject('MealBoxVego.PLY',[-1,-2,0]);
+meal5 = PlaceObject('MealBoxVego.PLY',[-1,-2.2,0]);
+meal6 = PlaceObject('MealBoxMeat.PLY',[-1,-2.4,0]);
+meal7 = PlaceObject('MealBoxMeat.PLY',[-3,-2,0]);
+meal8 = PlaceObject('MealBoxMeat.PLY',[-3,-2.2,0]);
+meal9 = PlaceObject('MealBoxMeat.PLY',[-3,-2.4,0]);
 
-juice1 = PlaceObject('JuiceBox.PLY',[2,-2,0]);
-juice2 = PlaceObject('JuiceBox.PLY',[2,-2.2,0]);
-juice3 = PlaceObject('JuiceBox.PLY',[2,-2.4,0]);
-juice4 = PlaceObject('JuiceBox.PLY',[1,-2,0]);
-juice5 = PlaceObject('JuiceBox.PLY',[1,-2.2,0]);
-juice6 = PlaceObject('JuiceBox.PLY',[1,-2.4,0]);
+juice1 = PlaceObject('JuiceBoxBlackcurrent.PLY',[2,-2,0]);
+juice2 = PlaceObject('JuiceBoxBlackcurrent.PLY',[2,-2.2,0]);
+juice3 = PlaceObject('JuiceBoxBlackcurrent.PLY',[2,-2.4,0]);
+juice4 = PlaceObject('JuiceBoxOrange.PLY',[1,-2,0]);
+juice5 = PlaceObject('JuiceBoxOrange.PLY',[1,-2.2,0]);
+juice6 = PlaceObject('JuiceBoxOrange.PLY',[1,-2.4,0]);
 cutlery1 = PlaceObject('Cutlery.PLY',[3,-2,0]);
 cutlery2 = PlaceObject('Cutlery.PLY',[3,-2.3,0]);
 
