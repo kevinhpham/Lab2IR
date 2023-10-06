@@ -3,6 +3,7 @@ classdef Item < handle
     obj;
     vertices;
     base;
+    plyFile;
     end 
 
     methods
@@ -13,23 +14,26 @@ classdef Item < handle
             %baseTr = 4x4 homogenous transformation
             
             %try to use colored version of PLY file, If none exist use the
-            %none colored version4
+            %none colored version
             filepath= append('PLYFILES\ColouredPlyFiles\',item);
             if exist(filepath,"file") == 2
             else
-            filepath= item;
-            disp('Cannot not find colored file exist,using default version.')
+                disp(['WARNING: Cannot not find ',filepath,', using default file instead.'])
+                filepath= item;
             end
-
-            if nargin < 2
+            
+            % If baseTr not provided, set to origin
+            if nargin < 1
                 baseTr = eye(4);
             end
+
             hold on
             self.obj = PlaceObject(filepath);
             self.vertices = get(self.obj,'Vertices');
             transformedVertices = [self.vertices,ones(size(self.vertices,1),1)] * baseTr.';
             set(self.obj,'Vertices',transformedVertices(:,1:3));
             self.base = baseTr;
+            self.plyFile = item;
         end
 
         function move(self,tr)
