@@ -19,7 +19,7 @@ classdef Item < handle
                 addpath("PLYFILES\Colored\")
                 self.obj = PlaceObject(item);
             catch
-                msg = "No colored file availiable. Proceeding to use none colored file."
+                msg = "No colored file availiable. Proceeding to use none colored file.";
                 warning(msg)
                 addpath("PLYFILES\NoColored\")
             end
