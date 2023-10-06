@@ -1,4 +1,4 @@
-%Creates a movable 3d model of a StockTray
+%Creates a movable 3d model of a Empty StockTray
 classdef StockTray < Item
     properties
     end 
