@@ -1,4 +1,4 @@
-%Creates a movable 3d model of a Cutlery
+%Creates a movable 3d model of a Conveyor2
 classdef Conveyor2 < Item
     properties
     end 

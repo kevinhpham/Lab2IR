@@ -13,21 +13,19 @@ classdef Item < handle
             %baseTr = 4x4 homogenous transformation
             
             %try to use colored version of PLY file, If none exist use the
-            %none colored version
-            try
-                rmpath("PLYFILES\NoColored\")
-                addpath("PLYFILES\Colored\")
-                self.obj = PlaceObject(item);
-            catch
-                msg = "No colored file availiable. Proceeding to use none colored file.";
-                warning(msg)
-                addpath("PLYFILES\NoColored\")
+            %none colored version4
+            filepath= append('PLYFILES\ColouredPlyFiles\',item);
+            if exist(filepath,"file") == 2
+            else
+            filepath= item;
+            disp('Cannot not find colored file exist,using default version.')
             end
+
             if nargin < 2
                 baseTr = eye(4);
             end
             hold on
-            self.obj = PlaceObject(item);
+            self.obj = PlaceObject(filepath);
             self.vertices = get(self.obj,'Vertices');
             transformedVertices = [self.vertices,ones(size(self.vertices,1),1)] * baseTr.';
             set(self.obj,'Vertices',transformedVertices(:,1:3));
