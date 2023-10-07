@@ -5,9 +5,8 @@ classdef JuiceBox < Item
 
     methods
         function item = JuiceBox(baseTr,flavour)
-        %type is a string specifying which type of juice to create
+        %'flavour' is a string specifying which type of juice to create
         %If no arguement provided use default values
-        %make sure arguements entered in correct order
             if nargin <2
                 flavour = 'none';
                 if nargin < 1
