@@ -1,4 +1,5 @@
 %Creates a movable 3d model of a Full StockTray
+%None functional juiceboxes, Only use for environment decoration
 classdef FullStockTray < Item
     properties
     end 
