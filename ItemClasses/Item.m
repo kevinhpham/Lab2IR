@@ -18,7 +18,8 @@ classdef Item < handle
             filepath= append('PLYFILES\ColouredPlyFiles\',item);
             if exist(filepath,"file") == 2
             else
-                disp(['WARNING: Cannot not find ',filepath,', using default file instead.'])
+                msg = 'Cannot not find colored version, using default file instead.';
+                warning(msg)
                 filepath= item;
             end
             
