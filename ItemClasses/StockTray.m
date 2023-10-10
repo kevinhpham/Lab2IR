@@ -26,7 +26,7 @@ classdef StockTray < Item
                 for i = 1:rows
                     for j= 1:coloumns
                         if counter <= count
-                            tr = transl((spacing*j-0.18) , (spacing*i-0.18) , 0.02)*rpy2tr(0,0,0,'deg');
+                            tr = transl((spacing*j-0.185) , (spacing*i-0.16) , 0.02)*rpy2tr(0,0,0,'deg');
                             juiceArray(counter) = JuiceBox(base*tr,flavour);
                             counter = counter +1;
                         end

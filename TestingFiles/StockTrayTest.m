@@ -3,4 +3,4 @@ close
 l= StockTray()
 axis equal
 camlight
-l.addJuice(5,'o')
+l.addJuice(4,'c')
