@@ -16,7 +16,7 @@ classdef LoadConveyor < Item
         end
         
         function push(self, items)
-            %Takes in item/items and pushes them along conveyer belt by 5cm
+            %Takes in multiple items and pushes them along conveyer belt by 5cm
             %at default speed
             if iscell(items)
                 cellfun(@self.pushIndividual, items);
@@ -26,15 +26,11 @@ classdef LoadConveyor < Item
                 arrayfun(@self.pushIndividual,items)
             end
 
-
-
         end
-    end
 
-    methods(Hidden)
         function pushIndividual(self, item)
             %Takes individuals items and pushes them along conveyor belt
-            verts = ([item.vertices,ones(size(item.vertices,1),1)])*item.base.'*inv(self.base).'; %Convert vertices of item into conveyerbelt's frame of reference. due to how the vertices array is structured, have to use the transpose of transformation matrices
+            verts = ([item.vertices,ones(size(item.vertices,1),1)])*item.base.'*inv(self.base).' %Convert vertices of item into conveyerbelt's frame of reference. due to how the vertices array is structured, have to use the transpose of transformation matrices
             for i = 1:length(verts(:,1))
                 if and((verts(i,1:3) < self.detectionZone(2,1:3)), (self.detectionZone(1,1:3) < verts(i,1:3))) %for loop checks vertices until it detects one within zone
                     rot = self.base(1:3,1:3); % rot = rotational matrix of conveybelt
@@ -54,8 +50,8 @@ classdef LoadConveyor < Item
             %homogenous vectors representing opposite corners of the
             %rectangular volume
             verts = self.vertices;      %the vertices of the conveyor
-            mins = [min(verts(:,1)), min(verts(:,2)), max(verts(:,3)),1];%A homogenous vector representing bottom corner of the zone
-            maxs = [max(verts(:,1)), max(verts(:,2)), max(verts(:,3))+0.1,1];%A homogenous vector representing the opposite top corner
+            mins = [min(verts(:,1)), min(verts(:,2)+0.1), max(verts(:,3)),1];%A homogenous vector representing bottom corner of the zone
+            maxs = [max(verts(:,1)), max(verts(:,2)-0.1), max(verts(:,3))+0.1,1];%A homogenous vector representing the opposite top corner
             self.detectionZone = [mins ; maxs]; %In reference frame of conveyor belt
         end
     end
