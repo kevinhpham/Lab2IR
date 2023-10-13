@@ -1,7 +1,7 @@
 classdef Item < handle
     properties
     obj;
-    vertices;
+    vertices; %In local frame of item
     base;
     plyFile;
     end 
