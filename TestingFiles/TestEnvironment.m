@@ -24,6 +24,8 @@ surf([-5,5;-5,5] ...
 
 % Import the Conveyor
 conveyor = Conveyor2(transl(0,-3.5,0));
+%conveyor = PlaceObject('Conveyor-3.PLY',[0,-3.5,0]);
+%juice5 = PlaceObject('JuiceBoxOrange.PLY',[1,-2.2,0]);
 
 % Offload bay for putting out stock - fresh cooked meals or juice/ cutlery
 offloadBay = OffloadBay(transl(-5,1,-0.88));
