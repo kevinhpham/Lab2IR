@@ -20,7 +20,7 @@ classdef RG6_Gripper <handle
              
      function CreateModel(self)   
         scale = 1; %changes size of the gripper
-        self.height = 0.16*scale;
+        self.height = 0.2*scale;
         links = [
                 Revolute('d', 0.152*scale,'a',0.03*scale,'alpha',pi/2,'qlim',[deg2rad(0),deg2rad(0)]) %create base of gripper;doesn't move or rotate
                 Revolute('d', 0,'a', 0.08*scale, 'alpha', 0,'offset',deg2rad(35),'qlim',[deg2rad(0),deg2rad(60)])
