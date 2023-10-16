@@ -22,57 +22,85 @@ surf([-5,5;-5,5] ...
       ,'CData',imread('WallPaperWords.jpg') ...
       ,'FaceColor','texturemap');
 
-% Import the Conveyor
-conveyor = Conveyor2(transl(0,-3.5,0));
-%conveyor = PlaceObject('Conveyor-3.PLY',[0,-3.5,0]);
-%juice5 = PlaceObject('JuiceBoxOrange.PLY',[1,-2.2,0]);
+surf([5,5;5,5] ...
+      ,[5,-5;5,-5] ...
+      ,[3,3;-0.88,-0.88] ...
+      ,'CData',imread('WallPaper.jpg') ...
+      ,'FaceColor','texturemap');
 
-% Offload bay for putting out stock - fresh cooked meals or juice/ cutlery
-offloadBay = OffloadBay(transl(-5,1,-0.88));
+trayConveyor = Conveyor2(transl(0,-4,0));
 
-% LHS Offload Bay
-stockTray1 = FullStockTray(transl(-5,1,-0.32));
-stockTray2 = FullStockTray(transl(-4,1,-0.32));
-emptyTray1 = StockTray(transl(-2,1.1,0));
-emptyTray2 = StockTray(transl(-1,1.1,0));
-stockBox1 = StockBox(transl(-4.7,-4.8,-0.88));
-stockBox1.move((transl(-4,-4.8,-0.88))*(rpy2tr(0,0,pi/2)));
+% Dobot Setup
+juiceConveyorLeft = ConveyorD(transl(0,0,0));
+juiceConveyorLeft.move((transl(-2,-0.8,0))*(rpy2tr(0,0,pi/2)));
+juiceConveyorCenter = ConveyorD(transl(0,0,0));
+juiceConveyorCenter.move((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
+juiceConveyorRight = ConveyorD(transl(0,0,0));
+juiceConveyorRight.move((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
+dobotTable = RobotTable(transl(-1.65,-3.6,0));
 
-% RHS Offload Bay
-emptyTray3 = StockTray(transl(0,1.1,0));
-stockTray4 = FullStockTray(transl(2,1,-0.32));
-stockTray5 = FullStockTray(transl(3,1,-0.32));
-stockTray6 = FullStockTray(transl(4,1,-0.32));
+% E05 Setup
+mealConveyorLeft = ConveyorD(transl(0,0,0));
+mealConveyorLeft.move((transl(1.3,-0.4,0))*(rpy2tr(0,0,pi/2)));
+mealConveyorRight = ConveyorD(transl(0,0,0));
+mealConveyorRight.move((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
+e05Table = MealRobotTable(transl(1.45,-3.6,0));
 
-% Robot 1 
-robotTable1 = RobotTable(transl(-2.9,-3,-0.88));
-loadConveyor1 = LoadConveyor(transl(-1.8,-2.5,-0.88));
-loadConveyor1.move((transl(-2.1,-2,-0.88))*(rpy2tr(0,0,pi/2)));
+% Area Dividers
+barrierLeft1 = GlassBarrier(transl(-4,-1,-0.9));
+barrierLeft2 = GlassBarrier(transl(-3.15,-1,-0.9));
+barrierRight1 = GlassBarrier(transl(4,-1,-0.9));
+barrierRight2 = GlassBarrier(transl(2.75,-1,-0.9));
+barrierCenter1 = GlassBarrier(transl(-0.15,-1,-0.9));
+barrierCenter2 = GlassBarrier(transl(0.15,-1,-0.9));
 
-%tray = Item('MT.ply', transl(0,0,0));
-%tray.move((transl(0,0,300))*(rpy2tr(30,10,5)));
+% Barrier Dividers
+barrierDivider1 = GlassBarrier(transl(0,0,0));
+barrierDivider1.move((transl(0,0,-0.9))*(rpy2tr(0,0,pi/2)));
+barrierDivider2 = GlassBarrier(transl(0,0,0));
+barrierDivider2.move((transl(0,2.0,-0.9))*(rpy2tr(0,0,pi/2)));
+barrierDivider3 = GlassBarrier(transl(0,0,0));
+barrierDivider3.move((transl(0,4.0,-0.9))*(rpy2tr(0,0,pi/2)));
 
-% Robot 2
-robotTable2 = RobotTable(transl(0.8,-3,-0.88));
-loadConveyor2 = LoadConveyor(transl(0.5,-2.5,-0.88));
-loadConveyor2.move((transl(1.6,-2,-0.88))*(rpy2tr(0,0,pi/2)));
+%Tray Divider
+barrierTray1 = GlassBarrier(transl(2.75,-3.2,-0.9));
+barrierTray2 = GlassBarrier(transl(0,0,0));
+barrierTray2.move((transl(3.7,-2.25,-0.9))*(rpy2tr(0,0,pi/2)));
+barrierTray3 = GlassBarrier(transl(0,0,0));
+barrierTray3.move((transl(3.7,-2.0,-0.9))*(rpy2tr(0,0,pi/2)));
 
-% Tray Holder
-trayStorage = TrayStorage(transl(0.5,-3.5,-0.88));
-trayStorage.move((transl(0,0,300))*(rpy2tr(30,10,5)));
+%Tray Storage
+trayStorage = TrayStorage(transl(0,0,0));
+trayStorage.move((transl(1.95,-3.6,0))*(rpy2tr(0,0,pi/2)));
+trayStorage2 = TrayStorage(transl(0,0,0));
+trayStorage2.move((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2)));
+trayStorage3 = TrayStorage(transl(0,0,0));
+trayStorage3.move((transl(3.85,-1.6,0))*(rpy2tr(0,0,pi/2)));
 
-%% Food Items to be Places
-%meal1 = PlaceObject('MealBoxVego.PLY',[-2,-2,0]);
-%meal2 = PlaceObject('MealBoxMeat.PLY',[-1,-2.4,0]);
+%Offload Bay
+offloadBay1 = OffloadBay(transl(2.5,4,-0.88));
+offloadBay2 = OffloadBay(transl(-10,4,-0.88));
 
-%juice1 = PlaceObject('JuiceBoxBlackcurrent.PLY',[2,-2,0]);
-%juice5 = PlaceObject('JuiceBoxOrange.PLY',[1,-2.2,0]);
+%Safety Bay
+safetyTable1 = MealRobotTable(transl(0,-2.0,0));
+eStop1 = Estop(transl(0,-2.0,0.2));
 
-%cutlery1 = PlaceObject('Cutlery.PLY',[3,-2,0]);
-%cutlery2 = PlaceObject('Cutlery.PLY',[3,-2.3,0]);
+safetyTable2 = MealRobotTable(transl(0,-2.6,0));
+fireExtinguisher = FireExtinguisher(transl(0,-2.6,0));
 
-%% Non food Items to be places
-%stockBox1 = StockBox(transl(-4.7,-4.8,-0.88));
-%stockTray1 = FullStockTray(transl(-1.2,-5,-0.32));
-%emptyStockTray1 = StockTray(transl(-3.6,-4.8,0));
+safetyTable3 = MealRobotTable(transl(0,-3.2,0));
+eStop2 = Estop(transl(0,-3.2,0.2));
 
+% First Aid
+firstAidJuice = FirstAidKit(transl(5,3.5,0));
+firstAidMeal = FirstAidKit(transl(-5,3.5,0));
+
+% OffloadBay
+package1 = FullStockTray(transl(-4.6,4,-0.3));
+package2 = FullStockTray(transl(-3.6,4,-0.3));
+package3 = FullStockTray(transl(-2.6,4,-0.3));
+package4 = FullStockTray(transl(-1.6,4,-0.3));
+
+% Package Boxes
+packageBox1 = StockBox(transl(-3.8,4,-0.88));
+packageBox2 = StockBox(transl(-1.8,4,-0.88));
