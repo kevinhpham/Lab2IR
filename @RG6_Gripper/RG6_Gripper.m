@@ -5,6 +5,7 @@ classdef RG6_Gripper <handle
  properties(Access = public)              
         left;
         right;
+        height;
  end
 
  methods
@@ -18,10 +19,12 @@ classdef RG6_Gripper <handle
      end
              
      function CreateModel(self)   
+        scale = 1; %changes size of the gripper
+        self.height = 0.16*scale;
         links = [
-                Revolute('d', 0.152,'a',0.03,'alpha',pi/2,'qlim',[deg2rad(0),deg2rad(0)]) %create base of gripper;doesn't move or rotate
-                Revolute('d', 0,'a', 0.08, 'alpha', 0,'offset',deg2rad(35),'qlim',[deg2rad(0),deg2rad(60)])
-                Revolute('d', 0, 'a', 0.054, 'alpha',0,'offset',deg2rad(60),'qlim',[-deg2rad(60),deg2rad(0)])
+                Revolute('d', 0.152*scale,'a',0.03*scale,'alpha',pi/2,'qlim',[deg2rad(0),deg2rad(0)]) %create base of gripper;doesn't move or rotate
+                Revolute('d', 0,'a', 0.08*scale, 'alpha', 0,'offset',deg2rad(35),'qlim',[deg2rad(0),deg2rad(60)])
+                Revolute('d', 0, 'a', 0.054*scale, 'alpha',0,'offset',deg2rad(60),'qlim',[-deg2rad(60),deg2rad(0)])
         ];
         self.left =  SerialLink(links, 'name', 'Gripper_LEFT');
         self.right = SerialLink(links, 'name', 'Gripper_RIGHT');
