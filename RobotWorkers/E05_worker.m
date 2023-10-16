@@ -29,7 +29,7 @@ classdef E05_worker <handle
                               deg2rad([-45 45]);
                               deg2rad([10 110]);
                               deg2rad([-360 360])]; %set up joint limits for arm
-           
+            self.robot.model.offset = [0 pi/2 -pi/3 0 0 0]
 
            %Set up Gripper
            self.grip = RG6_Gripper(self.robot.model.fkineUTS(self.robot.model.getpos()));

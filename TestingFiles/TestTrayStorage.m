@@ -1,8 +1,8 @@
 %Test creating tray rack in random orientation and spawns in trays
 clear
 close
-basetr = transl(1,1.2,0)*rpy2tr(45,0,45,'deg');
+basetr = transl(1,0,0)*rpy2tr(0,0,45,'deg');
 traystorage = TrayStorage(basetr);
-trays = traystorage.addTrays(16);
+trays = traystorage.addTrays(8);
 camlight
 axis equal
