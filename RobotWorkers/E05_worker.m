@@ -19,8 +19,8 @@ classdef E05_worker <handle
             %Sets up Linear UR3
             hold on
             self.robot = E05_L(basetr);
-            self.robot.model.plot([0 0 0 0 0 0])
-            self.robot.model.animate([0 0 0 0 0 0]);
+            self.robot.model.offset = [0 pi/2 -pi/3 0 0 0]
+            self.robot.model.plot(zeros(6))
             self.robot.model.delay = 0.01;
             self.robot.model.qlim = [
                               deg2rad([-180 150]);
@@ -33,6 +33,8 @@ classdef E05_worker <handle
 
            %Set up Gripper
            self.grip = RG6_Gripper(self.robot.model.fkineUTS(self.robot.model.getpos()));
+           self.grip.left.base = self.robot.model.fkineUTS(self.robot.model.getpos());
+           self.grip.right.base = self.robot.model.fkineUTS(self.robot.model.getpos())*rpy2tr(pi, 0, 0, 'xyz');
            self.grip.right.plot([0 0 0]);
            self.grip.left.plot([0 0 0]);
            self.grip.left.delay = 0.0;
