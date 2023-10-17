@@ -2,11 +2,16 @@ close
 hold on
 axis equal
 worker(1) = E05_worker(transl(0,0,0));
-rack(1) = TrayStorage(transl(-0.4,0.6,0));
-trays1 = rack(1).addTrays(8);
-worker(1).plotWorkspace()
-worker(1).pickup(trays1(1))
-worker(1).pickup(trays1(8))
+rack(1) = TrayStorage(transl(-0,0.7,0));
+trays = rack(1).addTrays(8);
+worker(1).plotWorkspace();
+qPath = worker(1).planPickupPath(trays(1));
+worker(1).animateGripper(1);
+for step = 1:length(qPath)
+    worker(1).animateArm(qPath(step,:))
+end
+worker(1).robot.model.teach(worker(1).robot.model.getpos())
+%worker(1).pickup(trays1(8))
 
 
 %%Testing multi threading toolbox
