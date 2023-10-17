@@ -14,9 +14,9 @@ itemCount = 10; %change number of items to spawn
 for j = 1:itemCount
     %Creates a cell of items on conveyor to push
     if mod(j,2)
-        items{j} = MealBox(convey(1).base*transl(0.2,0.2,0.87)*rpy2tr(0,0,0));
+        items{j} = MealBox(convey(1).base*transl(0.2,0.2,0.87));
     else
-        items{j} = Tray(convey(1).base*transl(0.2,0.2,0.87)*rpy2tr(0,0,0));
+        items{j} = Tray(convey(1).base*transl(0.2,0.2,0.87));
     end
 
     for i = 1:50
