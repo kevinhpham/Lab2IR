@@ -81,11 +81,11 @@ classdef E05_worker <handle
                 %Add midway path
                 q0 = self.robot.model.getpos();
                 midPoint = self.searchPickupMid(item); %Finds midpoint position
-                midPointPath = jtraj(q0,midPoint,steps);
+                midPointPath = jtraj(q0,midPoint,steps/2);
                 %Add pickup path
                 q0 = midPoint;
                 goal = self.searchPickup(item); %Place gripper onto item
-                endPointPath = jtraj(q0,goal,steps);     
+                endPointPath = jtraj(q0,goal,steps/2);     
                 qPath = [midPointPath;endPointPath];
                 %disp(['E05_Worker: I was not designed to pick this up! ', item.plyFile]);
         end
