@@ -1,9 +1,9 @@
 classdef Item < handle
     properties
     obj;
-    vertices;
+    vertices; %vertices of item in item's base frame
     base;
-    plyFile;
+    plyFile; %Name of ply file of item
     end 
 
     methods
@@ -15,13 +15,13 @@ classdef Item < handle
             
             %try to use colored version of PLY file, If none exist use the
             %none colored version
-            filepath= append('PLYFILES\ColouredPlyFiles\',item);
-            if exist(filepath,"file") == 2
-            else
-                msg = 'Cannot not find colored version, using default file instead.';
-                warning(msg)
-                filepath= item;
-            end
+            % filepath= append('PLYFILES\ColouredPlyFiles\',item);
+            % if exist(filepath,"file") == 2
+            % else
+            %     msg = 'Cannot not find colored version, using default file instead.';
+            %     warning(msg)
+                 filepath= item;
+            % end
             
             % If baseTr not provided, set to origin
             if nargin < 1
