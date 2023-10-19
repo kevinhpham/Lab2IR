@@ -62,7 +62,15 @@ classdef E05_worker <handle
         plot3(pointCloud(:,1),pointCloud(:,2),pointCloud(:,3),'r.');
         volume = (max(pointCloud(:,1))-min(pointCloud(:,1))*(max(pointCloud(:,2))-min(pointCloud(:,2))))*(max(pointCloud(:,3))-min(pointCloud(:,3)));
         disp(['Aproximated volume of workspace given current joint limits is ', num2str(volume),'m^3']);
-        end 
+        end
+        function [qPath] = planPlacePath(self,placement,steps)
+            %Plans the path from picking up item to placing
+            %it down. "Placement" is the item to place on, e.g if placing
+            %down a tray on conveyorbelt, "placement" = the conveyorbelt.
+            
+
+        end
+
 
         function [qPath] = planPickupPath(self,item,steps)
             %Returns a joint path the robot can take to pick up an item.
@@ -110,9 +118,58 @@ classdef E05_worker <handle
 
     end
 
-
-
     methods(Hidden)
+        function [targetJointspath] = liftUp(self,steps)
+           % 3.2
+T1 = [eye(3) [1.5 1 0]'; zeros(1,3) 1];       % First pose
+T2 = [eye(3) [1.5 -1 0]'; zeros(1,3) 1];      % Second pose
+
+% 3.3
+M = [1 1 zeros(1,4)];                         % Masking Matrix
+q1 = p2.ikine(T1, 'q0', [0 0], 'mask', M);    % Solve for joint angles
+q2 = p2.ikine(T2, 'q0', [0 0], 'mask', M);    % Solve for joint angles
+
+% 3.4
+qMatrix = jtraj(q1,q2,steps);
+p2.plot(qMatrix,'trail','r-');
+
+% 3.5: Resolved Motion Rate Control
+steps = 50;
+
+% 3.6
+x1 = [1.5 1]';
+x2 = [1.5 -1]';
+deltaT = 1;                                        % Discrete time step
+
+% 3.7
+x = zeros(2,steps);
+s = lspb(0,1,steps);                                 % Create interpolation scalar
+for i = 1:steps
+    x(:,i) = x1*(1-s(i)) + s(i)*x2;               % Create trajectory in x-y plane
+end
+
+% 3.8
+qMatrix = nan(steps,2);
+
+% 3.9
+qMatrix(1,:) = p2.ikine(T1, 'q0', [0 0], 'mask', M)        % Solve for joint angles
+
+% 3.10
+for i = 1:steps-1
+   xdot = x(:,i+deltaT)- x(:,i)                         % Calculate velocity at discrete time step
+    J = p2.jacob0(qMatrix(i,:));          % Get the Jacobian at the current state
+     J = J(1:2,:);                           % Take only first 2 rows
+     qdot = inv(J) * xdot                             % Solve velocitities via RMRC
+     qMatrix(i+1,:) = qMatrix(i,:)+qdot.';        % Update next joint state
+ end
+ 
+ p2.plot(qMatrix,'trail','r-');
+
+end
+
+
+        end
+
         function targetJoints = searchPickup(self,item,buffer)
             %Finds an end effector joint position to place gripper above item
             %buffer is the vertical distance between item and gripper, in meters.

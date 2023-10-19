@@ -2,7 +2,7 @@
 classdef ConveyorClass < Item
     properties(Access = private)
         detectionZone; %In reference frame of conveyor belt
-        pushDistance = 0.05; %Controls how much the conveyorbelt pushes items in meters
+        pushDistance = 0.02; %Controls how much the conveyorbelt pushes items in meters
     end 
 
     methods

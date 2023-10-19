@@ -10,7 +10,6 @@ classdef Conveyor2 < ConveyorClass
                 baseTr = eye(4);
             end
             conveyor = conveyor@ConveyorClass(plyName,baseTr)
-            conveyor.updateDetectionZone();
         end
     end
 end
