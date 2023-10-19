@@ -1,3 +1,4 @@
+%Represent a 3d model of an item
 classdef Item < handle
     properties
     obj;
@@ -8,7 +9,7 @@ classdef Item < handle
 
     methods
         function self = Item(item,baseTr)
-            %Place 'item' into environment at 'baseTR'
+            %Constructs and places 'Item' into 3d environment at 'baseTR'
             %'baseTR' is relative to global frame of reference
             %item = '.ply'
             %baseTr = 4x4 homogenous transformation
