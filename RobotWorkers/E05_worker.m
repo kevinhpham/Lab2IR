@@ -4,10 +4,7 @@ classdef E05_worker <handle
     properties
        robot; 
        gripper; 
-       speed = 1; %control speed factor of robot
-       closeGrip;
-       openGrip;
-
+       speed = 1; %control speed factor of robo
     end
 
     methods
@@ -21,28 +18,23 @@ classdef E05_worker <handle
             self.robot = E05_L(basetr);
             self.robot.model.offset = [0 pi/2 -pi/3 0 0 0];
             self.robot.model.plot(zeros(6))
-            self.robot.model.delay = 0.01;
+            self.robot.model.delay = 0;
             self.robot.model.qlim = [
-                              deg2rad([-180 150]);
+                              deg2rad([-360 360]);
                               deg2rad([10 90]);
                               deg2rad([10 90]);
-                              deg2rad([-45 45]);
+                              deg2rad([-90 90]);
                               deg2rad([10 110]);
-                              deg2rad([-360 360])]; %set up joint limits for arm
+                              deg2rad([-720 720])]; %set up joint limits for arm
 
            %Set up Gripper
            self.gripper = RG6_Gripper(self.robot.model.fkineUTS(self.robot.model.getpos()));
-           self.gripper.left.base = self.robot.model.fkineUTS(self.robot.model.getpos());
-           self.gripper.right.base = self.robot.model.fkineUTS(self.robot.model.getpos())*rpy2tr(pi, 0, 0, 'xyz');
-           self.gripper.right.plot([0 0 0]);
-           self.gripper.left.plot([0 0 0]);
-           self.gripper.left.delay = 0.0;
-           self.gripper.right.delay = 0.0;
-           self.closeGrip = jtraj([0 0 0],[0 deg2rad(30) -deg2rad(30)],ceil(20/self.speed)); 
-           self.openGrip = jtraj([0 deg2rad(30) -deg2rad(30)],[0 0 0],ceil(10/self.speed)); 
+           self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
+           self.gripper.plot([0 0 0]);
+           self.gripper.setDelay(0)
         end
 
-        %%Plots the workspace of the worker as a pointcloud and finds approximate volume
+        %%Plots the workspace of the arm as a pointcloud and finds approximate volume
         function plotWorkspace(self)
             qlim = self.robot.model.qlim;
             base = self.robot.model.base.T;
@@ -73,18 +65,20 @@ classdef E05_worker <handle
         end 
 
         function [qPath] = planPickupPath(self,item,steps)
-            %Returns a path the robot can take to pick up an item.
+            %Returns a joint path the robot can take to pick up an item.
             if nargin <= 2
                 disp(['E05_Worker: Planning for default number of steps', item.plyFile])
                 steps = 60;
             end
                 %Add midway path
                 q0 = self.robot.model.getpos();
-                midPoint = self.searchPickupMid(item); %Finds midpoint position
-                midPointPath = jtraj(q0,midPoint,steps/2);
+                disp(['E05_Worker: Looking for midwaypoint to pick up ', item.plyFile]);
+                midPointq = self.searchPickup(item,0.2); %Finds midpoint position
+                midPointPath = jtraj(q0,midPointq,steps/2);
                 %Add pickup path
-                q0 = midPoint;
-                goal = self.searchPickup(item); %Place gripper onto item
+                q0 = midPointq;
+                disp(['E05_Worker: Looking for path to pick up ',item.plyFile]);
+                goal = self.searchPickup(item,0); %Place gripper onto item
                 endPointPath = jtraj(q0,goal,steps/2);     
                 qPath = [midPointPath;endPointPath];
                 %disp(['E05_Worker: I was not designed to pick this up! ', item.plyFile]);
@@ -94,10 +88,8 @@ classdef E05_worker <handle
             %animate arm and gripper to move together.
             %To animate path smoothely, enter in jointsteps 1 by 1 with loop
             self.robot.model.animate(qq)
-            self.gripper.left.base = self.robot.model.fkineUTS(self.robot.model.getpos());
-            self.gripper.right.base = self.robot.model.fkineUTS(self.robot.model.getpos())*rpy2tr(pi, 0, 0, 'xyz');
-            self.gripper.left.animate(self.gripper.left.getpos())
-            self.gripper.right.animate(self.gripper.right.getpos())
+            self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
+            self.gripper.animate(self.gripper.getPos())
         end
 
         function animateGripper(self, scale)
@@ -109,9 +101,9 @@ classdef E05_worker <handle
                 msg = "An invalid gripper scale has been chosen. Choose a scale between 0 and 1";
                 error(msg);
             end
-            q = [0 self.gripper.left.qlim(2,2) self.gripper.left.qlim(3,1)]*scale;
-            self.gripper.left.animate(q);
-            self.gripper.right.animate(q);
+            qlims = self.gripper.getQlim();
+            q = [0 qlims(2,2) qlims(3,1)]*scale;
+            self.gripper.animate(q);
         end
 
 
@@ -121,47 +113,33 @@ classdef E05_worker <handle
 
 
     methods(Hidden)
-            function target = searchPickupMid(self,item)
-            %Finds an end effector joint position that will place robot
-            %effector above item
-            target =[];
-            disp(['E05_Worker: Looking for midwaypoint to pick up ', item.plyFile]);
-            verts = ([item.vertices,ones(size(item.vertices,1),1)])*item.base.'; %vertices of item in global frame
-                while(isempty(target)) %repeat search until a valid target is found
-                    [~,index] = max(verts(:,3)); %Look for highest point on item
-                    targetPosition = transl(verts(index,1:3))*transl(0,0,self.gripper.height+0.3)*rpy2tr(pi,0,0); %Target endeffector position will be highest point on item + buffer height
-                    target = self.robot.model.ikcon(targetPosition,self.robot.model.getpos()) ;%perform inverse kinematic to check if robot can reach target position
-                    if(isempty(target))
-                        verts(index,:) = [];     %remove position for list to check
-                        disp('E05_Worker: Trying new location')
-                    end
-                end
-            disp('E05_Worker: Found midwaypoint');
-            disp('E05_Worker: Error for this point = ');
-            error = targetPosition- self.robot.model.fkineUTS(target)
+        function targetJoints = searchPickup(self,item,buffer)
+            %Finds an end effector joint position to place gripper above item
+            %buffer is the vertical distance between item and gripper, in meters.
+            %Loops to checks vertices until it find a vertice that it can reach. 
+            %Will try to pickup items from above
+            verts = ([item.vertices,ones(size(item.vertices,1),1)]); %vertices of item in global frame
+            if(strncmpi(item.plyFile,'MealBox.ply',7))
+                disp(['E05_Worker: Using gripper pose for mealbox.'])
+                buffer = buffer-0.02;
+                gripTr = transl(0.05,0,self.gripper.getHeight()+buffer)*rpy2tr(pi,0,pi/2); %pose for picking up mealboxes
+                [~,index] = max(verts(:,3)); %Look for highest point in list of verticies, which is the handle of box
+                targetPosition = item.base*transl(verts(index,1:3))*gripTr; %get target pose for final arm link to align gripper properly
             
-        end
-
-        function target = searchPickup(self,item)
-            %Finds an end effector joint position to place gripper onto item
-            %Loops to checks vertices on the item to pick up until it find
-            %a vertice that it can reach. Will try to pickup items from
-            %above
-            target =[];
-            disp(['E05_Worker: Looking for path to pick up ',item.plyFile]);
-            verts = ([item.vertices,ones(size(item.vertices,1),1)])*item.base.'; %vertices of item in global frame
-                while(isempty(target)) %repeat search until a valid target is found
-                    [~,index] = max(verts(:,3)); %Look for highest point on item
-                    targetPosition = transl(verts(index,1:3))*transl(0,0,self.gripper.height)*rpy2tr(pi,0,0);
-                    target = self.robot.model.ikcon(targetPosition,self.robot.model.getpos()); %perform inverse kinematic to check if robot can reach target position
-                    if(isempty(target))
-                        verts(index,:) = [] ;    %remove position for list to check
-                        disp('E05_Worker: Trying new location to pick up')
-                    end
-                end
-            disp('E05_Worker: Found target to pickup');
-            disp('E05_Worker: Error for this pickup = ');
-            error = targetPosition- self.robot.model.fkineUTS(target)
+            elseif(strncmpi(item.plyFile,'Tray.ply',4))
+                disp(['E05_Worker: Using gripper pose for tray.'])
+                buffer = buffer + (max(verts(:,1)));
+                gripTr = transl(-(self.gripper.getHeight()+buffer),0,0)*rpy2tr(0,pi/2,0); %pose for picking up top edge of tray
+                targetPosition = item.base*gripTr; %get target pose for final arm link to align gripper properly
+            else
+                msg = ["Robot wasn't design to pick up",item.plyFile];
+                warning(msg);
+            end
+                targetJoints = self.robot.model.ikcon(targetPosition,self.robot.model.getpos()); %perform inverse kinematic for joint positions
+                disp('E05_Worker: Found target joint positions');
+                disp('E05_Worker: Error for this position = ');
+                error = targetPosition- self.robot.model.fkineUTS(targetJoints);
+                disp(error);
         end
     end
 end
