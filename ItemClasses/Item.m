@@ -15,13 +15,13 @@ classdef Item < handle
             
             %try to use colored version of PLY file, If none exist use the
             %none colored version
-            filepath= append('PLYFILES\ColouredPlyFiles\',item);
-            if exist(filepath,"file") == 2
-            else
-                msg = 'Cannot not find colored version, using default file instead.';
-                warning(msg)
+            % filepath= append('PLYFILES\ColouredPlyFiles\',item);
+            % if exist(filepath,"file") == 2
+            % else
+            %     msg = 'Cannot not find colored version, using default file instead.';
+            %     warning(msg)
                 filepath= item;
-            end
+            % end
             
             % If baseTr not provided, set to origin
             if nargin < 1
