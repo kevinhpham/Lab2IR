@@ -1,16 +1,16 @@
 % Creates conveyors that deliver items to the robot
 
-classdef ConveyorD < Item
+classdef ConveyorD < ConveyorClass
     properties
     end 
 
     methods
-        function item = ConveyorD(baseTr)
+        function conveyor = ConveyorD(baseTr)
             plyName = 'Conveyor-D.PLY';
             if nargin < 1
                 baseTr = eye(4);
             end
-            item = item@Item(plyName,baseTr)
+            conveyor = conveyor@ConveyorClass(plyName,baseTr)
         end
     end
 end
