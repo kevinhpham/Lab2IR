@@ -1,5 +1,7 @@
 %% Setting the Environment
 % Clear the figures & set up the conditions for the environment
+
+% Testing if this works
 clf
 camlight
 axis equal;
