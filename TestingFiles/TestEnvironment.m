@@ -45,6 +45,7 @@ mealConveyorLeft.move((transl(1.3,-0.4,0))*(rpy2tr(0,0,pi/2)));
 mealConveyorRight = ConveyorD(transl(0,0,0));
 mealConveyorRight.move((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
 e05Table = MealRobotTable(transl(1.45,-3.6,0));
+worker(1) = E05_worker(e05Table.base*transl(0,0,0.9))
 
 % Area Dividers
 barrierLeft1 = GlassBarrier(transl(-4,-1,-0.9));
@@ -104,3 +105,9 @@ package4 = FullStockTray(transl(-1.6,4,-0.3));
 % Package Boxes
 packageBox1 = StockBox(transl(-3.8,4,-0.88));
 packageBox2 = StockBox(transl(-1.8,4,-0.88));
+
+%% Idea
+% Make a list of objects to be pushed vs not
+% Cell
+% Pass the cell into conveyor belt class
+% 
