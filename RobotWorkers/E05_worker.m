@@ -63,12 +63,14 @@ classdef E05_worker <handle
         volume = (max(pointCloud(:,1))-min(pointCloud(:,1))*(max(pointCloud(:,2))-min(pointCloud(:,2))))*(max(pointCloud(:,3))-min(pointCloud(:,3)));
         disp(['Aproximated volume of workspace given current joint limits is ', num2str(volume),'m^3']);
         end
+
         function [qPath] = planPlacePath(self,placement,steps)
             %Plans the path from picking up item to placing
             %it down. "Placement" is the item to place on, e.g if placing
             %down a tray on conveyorbelt, "placement" = the conveyorbelt.
-            
-
+            %unfinished
+            qPath(1) = self.liftUp(self,1,steps/3);
+            qpath(2) = 0;
         end
 
 
@@ -114,62 +116,46 @@ classdef E05_worker <handle
             self.gripper.animate(q);
         end
 
+        function [jointPath] = liftUp(self,distance,steps)
+            %Returns path to move end effector directely up by "distance" meters using resolved
+            %motion control and damped least squares
+            disp('E05_Worker: Planning path to lift arm up')
+            z1 = zeros(1,6);
+            z2 = [0 0 distance 0 0 0];                          %x y z r p y, move up in z direction by 1m
+            z = zeros(6,steps);
+            s = lspb(0,1,steps);                                % Create interpolation scalar for trapezoidal velocity path
+            minManipMeasure = 0.3;                              % Minimum measure of manipulativity before damping kicks in
+            m = zeros(1,steps);
+            errorValue= zeros(6,steps);
+            for i = 1:steps
+                z(:,i) = z1*(1-s(i)) + s(i)*z2;                 %creating straight line path for end effector to follow with trapezoidal velocity                
+            end 
+            jointPath = nan(steps,6);
+            jointPath(1,:) = self.robot.model.getpos();         %Start at current joint position
+            for i = 1:steps-1
+               zdot = z(:,i+1)-z(:,i);                          % Calculate velocity at discrete time step
+               J = self.robot.model.jacob0(jointPath(i,:));     % Get the Jacobian at the current state                          % Take only first 2 rows
+               m(:,i)= sqrt(det(J*J'));                         %Calculate current measure of manipulativity
+               if m(:,i) < minManipMeasure                      %if below threshhold manipulativity
+                    lambda = (1-(m(:,i)/minManipMeasure)^2)*0.3;
+                    qdot = inv((J'*J+lambda*eye(6)))*J'*zdot;   %Use dampled least squared
+               else
+               qdot = inv(J)*zdot();                            % Solve velocitities via RMRC
+               end
+            errorValue(:,i) = zdot- J*qdot;
+            jointPath(i+1,:) = jointPath(i,:)+qdot.';           %Update the next joint state
+            end           
+            
+            disp('E05_Worker: Path to lift arm up found.')
+            disp('E05_Worker: Here are the joint velocity errors:')
+            display(errorValue.')
+
+        end
 
 
     end
 
     methods(Hidden)
-        function [targetJointspath] = liftUp(self,steps)
-           % 3.2
-T1 = [eye(3) [1.5 1 0]'; zeros(1,3) 1];       % First pose
-T2 = [eye(3) [1.5 -1 0]'; zeros(1,3) 1];      % Second pose
-
-% 3.3
-M = [1 1 zeros(1,4)];                         % Masking Matrix
-q1 = p2.ikine(T1, 'q0', [0 0], 'mask', M);    % Solve for joint angles
-q2 = p2.ikine(T2, 'q0', [0 0], 'mask', M);    % Solve for joint angles
-
-% 3.4
-qMatrix = jtraj(q1,q2,steps);
-p2.plot(qMatrix,'trail','r-');
-
-% 3.5: Resolved Motion Rate Control
-steps = 50;
-
-% 3.6
-x1 = [1.5 1]';
-x2 = [1.5 -1]';
-deltaT = 1;                                        % Discrete time step
-
-% 3.7
-x = zeros(2,steps);
-s = lspb(0,1,steps);                                 % Create interpolation scalar
-for i = 1:steps
-    x(:,i) = x1*(1-s(i)) + s(i)*x2;               % Create trajectory in x-y plane
-end
-
-% 3.8
-qMatrix = nan(steps,2);
-
-% 3.9
-qMatrix(1,:) = p2.ikine(T1, 'q0', [0 0], 'mask', M)        % Solve for joint angles
-
-% 3.10
-for i = 1:steps-1
-   xdot = x(:,i+deltaT)- x(:,i)                         % Calculate velocity at discrete time step
-    J = p2.jacob0(qMatrix(i,:));          % Get the Jacobian at the current state
-     J = J(1:2,:);                           % Take only first 2 rows
-     qdot = inv(J) * xdot                             % Solve velocitities via RMRC
-     qMatrix(i+1,:) = qMatrix(i,:)+qdot.';        % Update next joint state
- end
- 
- p2.plot(qMatrix,'trail','r-');
-
-end
-
-
-        end
-
         function targetJoints = searchPickup(self,item,buffer)
             %Finds an end effector joint position to place gripper above item
             %buffer is the vertical distance between item and gripper, in meters.
