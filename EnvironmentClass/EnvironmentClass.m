@@ -1,3 +1,6 @@
+%% This class will be used to set-up the environment
+% It is derived from the TestEnvironment '.m' file.
+
 %% Setting the Environment
 % Clear the figures & set up the conditions for the environment
 clf

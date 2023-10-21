@@ -1,11 +1,13 @@
+% This class creates a robot gripper for the E05_L
+% The gripper is made up of two seperate serial link arms: left, right
+
 classdef RG6_Gripper <handle
-%Two finger gripper for E05 L
-%The Gripper robot is made up of two seperate serial link arms,
-% 'left' and 'right' representing fingers
+
+ % 'left' and 'right' represent fingers
  properties(Access = private)
         left;
         right;
-        height; %current height of gripper
+        height; % Current height of gripper
  end
 
  methods
@@ -14,16 +16,21 @@ classdef RG6_Gripper <handle
         if nargin < 1			
 			baseTr = eye(4);				
         end
+
+        % Fkine UTS is used as it is faster at calculating forward
+        % kinematics
         self.left.base = self.left.base.T * baseTr;
         self.right.base = self.right.base.T * baseTr * rpy2tr(pi, 0, 0, 'xyz');
-        tr = inv(self.left.base.T)*self.left.fkineUTS([0 0 0]);%transform of end effector in gripper base frame
+        tr = inv(self.left.base.T)*self.left.fkineUTS([0 0 0]); % Transform of end effector in gripper base frame
         self.height = tr(3,4);
         end
-             
+     
+     % Creates a gripper based on links & DH parameters using revolute
+     % joints.
      function CreateModel(self)   
-        scale = 1; %changes size of the gripper
+        scale = 1; % Changes size of the gripper
         links = [
-                Revolute('d', 0.152*scale,'a',0.03*scale,'alpha',pi/2,'qlim',[deg2rad(0),deg2rad(0)]) %create base of gripper;doesn't move or rotate
+                Revolute('d', 0.152*scale,'a',0.03*scale,'alpha',pi/2,'qlim',[deg2rad(0),deg2rad(0)]) % Creates base of gripper; deg set to 0 to prevent translation/rotation
                 Revolute('d', 0,'a', 0.08*scale, 'alpha', 0,'offset',deg2rad(35),'qlim',[deg2rad(0),deg2rad(60)])
                 Revolute('d', 0, 'a', 0.054*scale, 'alpha',0,'offset',deg2rad(60),'qlim',[-deg2rad(60),deg2rad(0)])
         ];
@@ -36,36 +43,42 @@ classdef RG6_Gripper <handle
         self.right.base =baseTr*rpy2tr(0,0,pi);
      end
 
+    % Function: Animate gripper
     function animate(self,q)
-        %animate gripper
         hold on
         self.left.animate(q)
         self.right.animate(q)
         self.updateHeight();
     end
 
+    % Function: Plots both fingers of the gripper
+    % This supports the getPos function: retrieving joint positions.
     function plot(self,q)
-        %plot both fingers of gripper
         hold on
         self.left.plot(q)
         self.right.plot(q)
     end
 
+    % Function: Adds a delay defined by 't' to support simultaneous motion
+    % of the gripper fingers (left, right)
     function setDelay(self,t)
         self.left.delay = t;
         self.right.delay = t;
     end
 
+    % Function: Returns the height of the gripper. 
     function [height]= getHeight(self)
-        %Returns heigh of gripper
         height= self.height;
     end
 
+    % Function: Returns joint positions of fingers
+    % Assumes symmetrical behaviour: left = right
     function [q] = getPos(self)
-        %return joint positions of fingers,fingers have to be plotted first
         q = self.left.getpos();
     end
 
+    % Function: Returns the joint limits of fingers 
+    % Assumes symmetrical behaviour: left = right 
     function [qLims] = getQlim(self)
         qLims = self.left.qlim();
     end
@@ -73,8 +86,8 @@ classdef RG6_Gripper <handle
 
  methods(Hidden)
      function updateHeight(self)
-         %Updates height parameter, requires robot to be plotted
-         tr = inv(self.left.base.T)*self.left.fkineUTS(self.getPos());%transform of end effector in gripper base frame
+         % Updates height parameter, requires robot to be plotted
+         tr = inv(self.left.base.T)*self.left.fkineUTS(self.getPos());% Transform of end effector in gripper base frame
          self.height = tr(3,4);
      end
  end
