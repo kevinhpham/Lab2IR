@@ -5,6 +5,7 @@ classdef Item < handle
     vertices; %In local frame of item
     base;
     plyFile;
+    hitBox; %Corners of a rectangular prism that envelope the item's model. Corner points are relative to item's frame. Main use for basic collision detection
     end 
 
     methods
@@ -28,14 +29,16 @@ classdef Item < handle
             if nargin < 1
                 baseTr = eye(4);
             end
-
             hold on
             self.obj = PlaceObject(filepath);
             self.vertices = get(self.obj,'Vertices');
             transformedVertices = [self.vertices,ones(size(self.vertices,1),1)] * baseTr.';
             set(self.obj,'Vertices',transformedVertices(:,1:3));
             self.base = baseTr;
-            self.plyFile = item;
+            self.plyFile = item;                
+            corner1 = [min(self.vertices(:,1)), min(self.vertices(:,2)), max(self.vertices(:,3))];  % A vector representing bottom corner of hitbox
+            corner2 = [max(self.vertices(:,1)), max(self.vertices(:,2)), max(self.vertices(:,3))];  % A vector representing the opposite top corner of hitbox
+            self.hitBox = [corner1 ; corner2];    
         end
 
         function move(self,tr)
