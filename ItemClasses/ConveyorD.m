@@ -1,9 +1,6 @@
-% Creates conveyors that deliver items to the robot
+% Creates moveable 3D model of conveyors that deliver items to the robot
 
 classdef ConveyorD < ConveyorClass
-    properties
-    end 
-
     methods
         function conveyor = ConveyorD(baseTr)
             plyName = 'Conveyor-D.PLY';

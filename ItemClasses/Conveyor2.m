@@ -1,4 +1,4 @@
-% Creates a movable 3D model of c Conveyor 2
+% Creates a movable 3D model of a Conveyor 2
 % Conveyor 2 is the main conveyor used to assemble meal trays.
 
 classdef Conveyor2 < ConveyorClass
