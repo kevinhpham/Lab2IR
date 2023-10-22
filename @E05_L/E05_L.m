@@ -1,4 +1,4 @@
-% This is a class that cann be used to create an instance of an E05_L.
+% This is a class that can be used to create an instance of an E05_L.
 % The E05 is used to pickup/place trays and meals. 
 
 classdef E05_L <handle
