@@ -57,7 +57,7 @@ classdef VG10_Gripper <handle
         self.b2.animate(q)
     end
 
-    % Function: Plots each of the links so they are populated visually
+    % Plots each of the links so they are populated visually
     function plotAll(self,q)
         hold on
         self.a1.plot(q)
@@ -66,13 +66,14 @@ classdef VG10_Gripper <handle
         self.b2.plot(q)
     end
 
-    % Function: Sets a delay to support simulateneous motion of all the links.
+    % Sets a delay to support simulateneous mo
     function setDelay(self,t)
         self.a1.delay = t;
         self.a2.delay = t;
         self.b1.delay = t;
         self.b2.delay = t;
     end
+
  end
 end
 

@@ -25,7 +25,8 @@ classdef RG6_Gripper <handle
         self.height = tr(3,4);
         end
      
-     % Creates a gripper based on links & DH parameters. 
+     % Creates a gripper based on links & DH parameters using revolute
+     % joints.
      function CreateModel(self)   
         scale = 1; % Changes size of the gripper
         links = [
