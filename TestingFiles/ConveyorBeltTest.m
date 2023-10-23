@@ -1,6 +1,6 @@
 function ConveyorBeltTest()
-    %loadConveyor();
-    conveyorTest(Conveyor2()) %change input to any other Conveyorbelt class e.g "Conveyor2() 
+    loadConveyor();
+    %conveyorTest(Conveyor2()) %change input to any other Conveyorbelt class e.g "Conveyor2() 
 end
 
 function loadConveyor()
@@ -16,7 +16,7 @@ function loadConveyor()
     for j = 1:itemCount
         %Creates a cell of items on conveyor to push
         if mod(j,2)
-            items{j} = MealBox(convey(1).base*transl(0,0.2,0.87)*rpy2tr(0,0,pi/3));
+            items{j} = MealBox(convey(1).base*transl(0,0.2,0.87)*rpy2tr(0,0,pi/3),'v');
         else
             items{j} = Tray(convey(1).base*transl(0,0.2,0.87)*rpy2tr(0,0,pi/3));
         end

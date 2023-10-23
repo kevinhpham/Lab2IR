@@ -13,7 +13,6 @@ classdef MealBox < Item
                     baseTr = eye(4);
                 end
             end
-            
             %Check what type of flavour has been requested and
             %select appropriate Ply file
             flavourL = lower(flavour);

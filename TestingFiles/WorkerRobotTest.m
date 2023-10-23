@@ -1,16 +1,18 @@
 close
+clear
 hold on
 axis equal
+camlight
 worker = E05_worker(transl(0,0,-1));
 rack = TrayStorage(transl(-0,0.7,-1)*rpy2tr(0,0,0));
-convey = ConveyorD(transl(0,-0.7,-0.6)*rpy2tr(0,0,0));
+convey = ConveyorD(transl(-0.7,0,-0.6)*rpy2tr(0,0,-pi/2));
 convey.setPushDistance(0.05);
 
-pushables = {MealBox(convey.base)};                         %Create cell array for all objects that will be pushed by conveyor belt
+pushables = {MealBox(convey.base,'v')};                         %Create cell array for all objects that will be pushed by conveyor belt
 trays = num2cell(rack.addTrays(3));                         %Fill rack up with trays
 pushables = horzcat(pushables,trays);                       %concatenate the trays to the end of cells array of pushables
 %worker.plotWorkspace();                                    %Turn on to see workspace of robot
-steps = 20;
+steps = 30;
 for i = 1:length(trays)
     %Create joint planning path to move arm to tray
     q0 = worker.robot.model.getpos();
