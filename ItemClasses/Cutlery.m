@@ -1,4 +1,5 @@
-%Creates a movable 3d model of a Cutlery
+% Creates a movable 3d model of a single Cutlery packet.
+
 classdef Cutlery < Item
     properties
     end 
