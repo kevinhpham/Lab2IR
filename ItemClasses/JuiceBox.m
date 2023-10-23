@@ -1,4 +1,6 @@
-%Creates a juicebox 3d model of either orange or blackcurrant variation
+% Creates a juicebox 3D model
+% Supports two variations: Orange or blackcurrant
+
 classdef JuiceBox < Item
     properties
     end 
@@ -6,9 +8,9 @@ classdef JuiceBox < Item
     methods
         function item = JuiceBox(baseTr,flavour)
         %'flavour' is a string specifying which type of juice to create
-        %If no arguement provided use default values
+        % If no arguement provided use default values
             if nargin <2
-                flavour = 'none';
+                flavour = 'none';      
                 if nargin < 1
                     baseTr = eye(4);
                 end
