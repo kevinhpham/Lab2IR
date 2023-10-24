@@ -87,7 +87,7 @@ classdef RG6_Gripper <handle
  methods(Hidden)
      function updateHeight(self)
          % Updates height parameter, requires robot to be plotted
-         tr = inv(self.left.base.T)*self.left.fkineUTS(self.getPos());% Transform of end effector in gripper base frame
+         tr = inv(self.left.base.T)*self.left.fkineUTS(self.getPos());% Transform of finger tip in gripper base frame
          self.height = tr(3,4);
      end
  end
