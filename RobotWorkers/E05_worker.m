@@ -22,10 +22,10 @@ classdef E05_worker <handle
             self.robot.model.qlim = [
                               deg2rad([-360 360]);
                               deg2rad([-60 90]);
-                              deg2rad([-30 130]);
-                              deg2rad([-360 360]);
-                              deg2rad([-120 120]);
-                              deg2rad([-720 720])]; %set up joint limits for arm
+                              deg2rad([-30 120]);
+                              deg2rad([-90 90]);
+                              deg2rad([-10 150]);
+                              deg2rad([-360 360])]; %set up joint limits for arm
 
            %Set up Gripper
            self.gripper = RG6_Gripper(self.robot.model.fkineUTS(self.robot.model.getpos()));
@@ -38,15 +38,15 @@ classdef E05_worker <handle
         function plotWorkspace(self)
             qlim = self.robot.model.qlim;
             base = self.robot.model.base.T;
-            qStep = pi/12;
+            qStep = pi/6;
             pointCloudSize = prod(floor((qlim(1:6,1)-qlim(1:6,2))/qStep + 1));
             pointCloud = zeros(pointCloudSize,3);
             counter = 1;
 
             for q1=0:qStep:qlim(1,2)
-              for q2=qlim(2,1):qStep:qlim(2,2)
-                for q3=qlim(3,1):qStep:qlim(3,2)
-                        q4 = 0
+              for q2=0:qStep:qlim(2,2)
+                for q3=0:qStep:qlim(3,2)
+                        q4 = 0;
                         q5 = 0;
                         q6 = 0;
                         q=[q1,q2,q3,q4,q5,q6];
@@ -62,26 +62,59 @@ classdef E05_worker <handle
         volume = (max(pointCloud(:,1))-min(pointCloud(:,1))*(max(pointCloud(:,2))-min(pointCloud(:,2))))*(max(pointCloud(:,3))-min(pointCloud(:,3)));
         disp(['Aproximated volume of workspace given current joint limits is ', num2str(volume),'m^3']);
         end
+        
 
-        function [qPath] = planResetPath(self,q0,steps)
-            %Plans a path to reset the arm to 0 joint position
-             disp(['E05_Worker: Looking for reset path',]);
-            if nargin < 3
+        function [qPath] = planMidDepositPath(self,placement,q0,steps)
+            %Plans a path to reset the arm  joint position
+             disp(['E05_Worker: Looking for mid path to deposit onto ', placement.plyFile]);
+            if nargin < 4
                 steps = 60;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
-                if nargin < 2
-                    msg = 'q0 is not given.Path planners will use current joint position as q0. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path.';
+                if nargin < 3
+                    msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path.';
                     warning(msg);
-                    q0 = self.robot.model.getpos();
                 end
             end
-            qGoal = zeros(1,6);
-            qPath = jtraj(q0,qGoal,steps);
+            if(strncmpi(placement.plyFile,'Conveyor',8)) %midpath to place onto conveyor
+                qGoal = [-pi/2 0 pi/3 pi/2 pi/2 pi];
+                qPath = jtraj(q0,qGoal,steps);
+            elseif (strncmpi(placement.plyFile,'Tray',4)) %midpath to place onto tray
+                qGoal = [-pi/2 0 pi/3 pi/2 pi/2 0];
+                qPath = jtraj(q0,qGoal,steps);
+            else
+                msg('E05_Worker: no midpath avaliable for this item')
+                warning(msg)
+            end
+        end
+
+        function [qPath] = planMidPickPath(self,item,q0,steps)
+            %Plans a path to reset the arm  joint position
+             disp(['E05_Worker: Looking for mid path to pickup ', item.plyFile]);
+            if nargin < 4
+                steps = 60;
+                disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
+                if nargin < 3
+                    msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path.';
+                    warning(msg);
+                end
+            end
+            if(strncmpi(item.plyFile,'Mealbox',7)) %midpath to pickup mealbox
+                qGoal = [-pi 0 pi/3 0 pi/4 0];
+                qPath = jtraj(q0,qGoal,steps);
+            elseif (strncmpi(item.plyFile,'Tray',4)) %midpath to pickup tray
+                qGoal = [pi/2 -pi/12 pi/3 0 pi/2 0];
+                qPath = jtraj(q0,qGoal,steps);
+            else
+                msg('E05_Worker: no midpath avaliable for this item')
+                warning(msg)
+            end
+
         end
 
         function [qPath] = planDepositPath(self,item,placement,q0,steps)
-            %Plans the path for picking up item and placing it down on
-            %another "placement" is the object to place 'item' on, e.g if placing
+            %Plans the path from picking up item and placing it down on.
+            %Does not include retraction.
+            %"placement" is the object to place 'item' on, e.g if placing
             %down a tray on conveyorbelt, "placement" = conveyorbelt, 'item' = tray.
             disp(['E05_Worker: Looking for deposit path for ', item.plyFile]);
             if nargin < 5
@@ -93,16 +126,18 @@ classdef E05_worker <handle
                     q0 = self.robot.model.getpos();
                end
             end
-            qPath1 = self.searchLiftUp(q0,1.3,steps); 
+            qPath1 = self.planRetract(q0,1.5,steps); %Lift up whatever item is grasped
             q0 = qPath1(length(qPath1()),:);
-            qPath2 = self.searchDeposit(item,placement,q0,0.05,steps);    
-            qPath = [qPath1;qPath2];
+            qPath2 = self.planMidDepositPath(placement,q0,steps);
+            q0 = qPath2(length(qPath2()),:);
+            qPath3 = self.searchDeposit(item,placement,q0,0,steps);    
+            qPath = [qPath1;qPath2;qPath3];
         end
 
 
         function [qPath] = planPickupPath(self,item,q0,steps)
             %Returns a joint path the robot can take to pick up an item.
-            disp(['E05_Worker: Planning pick up path', item.plyFile]);
+            disp(['E05_Worker: Planning pick up path for', item.plyFile]);
             if nargin < 4
                 steps = 60;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
@@ -113,13 +148,15 @@ classdef E05_worker <handle
                end
             end
                 %Add midway path
-                disp(['E05_Worker: Looking for midwaypoint to pick up ', item.plyFile]);
-                midPath = self.searchPickup(item,q0,0.5,steps); %Finds midpoint position
+                qPath1 = self.planMidPickPath(item,q0,steps);
+                q0 = qPath1(length(qPath1),:);
+                disp(['E05_Worker: Looking for 2nd midwaypoint to pick up ', item.plyFile]);
+                qPath2 = self.searchPickup(item,q0,0.3,steps); %Finds midpoint position
                 %Add pickup path
                 disp(['E05_Worker: Looking for endpoint to pick up ', item.plyFile]);
-                q0 = midPath(length(midPath),:);
-                endPath = self.searchPickup(item,q0,0,steps); %Place gripper onto item    
-                qPath = [midPath;endPath];
+                q0 = qPath2(length(qPath2),:);
+                qPath3 = self.searchPickup(item,q0,0,steps); %Place gripper onto item    
+                qPath = [qPath1;qPath2;qPath3];
         end
 
         function animateArm(self,qq,item)
@@ -141,8 +178,6 @@ classdef E05_worker <handle
             self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
             self.gripper.animate(self.gripper.getPos());
             end
-
-          
         end
 
         function animateGripper(self, scale)
@@ -159,29 +194,31 @@ classdef E05_worker <handle
             self.gripper.animate(q);
         end
 
-        function [jointPath] = searchLiftUp(self,q0,distance,steps)
-            %Returns path to move end effector directely up by "distance" meters using resolved
+        function [jointPath] = planRetract(self,q0,distance,steps)
+            %Returns path to retract end effector by "distance" meters using resolved
             %motion control and damped least squares
-            %Uses robot's current position for path planning
-            disp('E05_Worker: Planning path to lift arm up')
+            %Uses robot's current position (q0) for path planning
+            disp('E05_Worker: Planning path to retract end effector')
             if nargin < 4
                 steps = 30;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
                 if nargin < 3
                     distance = 0.3;
-                    disp(['E05_Worker: distance value is set to default: ',num2str(distance), "m"])
+                    disp(['E05_Worker: Distance value is set to default: ',num2str(distance), "m"])
                     if nargin < 2
                         msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations.  q0 helps path planners to find the most optimal joint path';
                         warning(msg);
                     end
                 end
             end
-            z1 = zeros(1,6);
-            z2 = [0 0 distance 0 0 0];                          %x y z r p y, move up in z direction by 1m
-            z = zeros(6,steps);
-            s = lspb(0,1,steps);                                % Create interpolation scalar for trapezoidal velocity path
-            minManipMeasure = 0.3;                              % Minimum measure of manipulativity before damping kicks in
-            m = zeros(1,steps);
+            endtr = self.robot.model.fkineUTS(q0);                       %get end effector frame
+            Retractedtr = endtr*transl(0,0,-distance);                   %retracted end effector back in it's own z-axis
+            z1 = [endtr(1:3,4).' zeros(1,3)];                            %starting translation of endeffector with orientation masked off (x y z r p y)
+            z2 = [Retractedtr(1:3,4).' zeros(1,3)];                    %goal translation of endeffector with orientation masked off
+            z = zeros(6,steps);                                         %empty matrix to store planned path for end effector
+            s = lspb(0,1,steps);                                        % Create interpolation scalar for trapezoidal velocity path
+            minManipMeasure = 0.3;                                      % Minimum measure of manipulativity before damping kicks in
+            m = zeros(1,steps);                                         %empty matrix to store measure of manipulativity for each step
             errorValue= zeros(6,steps);
             for i = 1:steps
                 z(:,i) = z1*(1-s(i)) + s(i)*z2;                 %creating straight line path for end effector to follow with trapezoidal velocity                
@@ -201,10 +238,9 @@ classdef E05_worker <handle
             errorValue(:,i) = zdot- J*qdot;
             jointPath(i+1,:) = jointPath(i,:)+qdot.';           %Update the next joint state
             end           
-            
-            disp('E05_Worker: Path to lift arm up found.')
+            disp('E05_Worker: Path to retract arm found.')
             disp('E05_Worker: Here are the joint velocity errors:')
-            display(errorValue.')
+            %display(errorValue.')
         end
     end
 
@@ -221,32 +257,42 @@ classdef E05_worker <handle
                     buffer = 0;
                     disp(['E05_Worker: buffer value is set to default: ',num2str(buffer),'m'])
                     if nargin < 3
-                        msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations.  q0 helps path planners to find the most optimal joint path';
+                        msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path';
                         warning(msg);
                     end
                 end
             end
             verts = ([item.vertices,ones(size(item.vertices,1),1)]); %vertices of item
+            %Find out what item is being picked up and the corresponding gripper
+            %pose to pick up that item.
             if(strncmpi(item.plyFile,'MealBox.ply',7))
                 disp(['E05_Worker: Using gripper pose for mealbox'])
-                buffer = buffer-0.02;
-                gripTr = transl(0.05,0,self.gripper.getHeight()+buffer)*rpy2tr(pi,0,pi/2); %pose for picking up mealboxes
+                buffer = buffer-0.02 + self.gripper.getHeight();
+                gripTr = transl(0.05,0,buffer)*rpy2tr(pi,0,pi/2); %pose for picking up mealboxes
                 [~,index] = max(verts(:,3)); %Look for highest point in list of verticies, which is the handle of box
                 targetPosition = item.base*transl(verts(index,1:3))*gripTr; %get target pose for final arm link to align gripper properly
             
             elseif(strncmpi(item.plyFile,'Tray.ply',4))
                 disp(['E05_Worker: Using gripper pose for tray'])
-                buffer = buffer + (max(verts(:,1)));
-                gripTr = transl(-(self.gripper.getHeight()+buffer),0,0)*rpy2tr(0,pi/2,0); %pose for picking up top edge of tray
-                targetPosition = item.base*gripTr; %get target pose for final arm link to align gripper properly
+                buffer = buffer + (item.hitBox(2,1))*1.5 + self.gripper.getHeight();  % distance between arm end link and pickup =buffer + traylength + gripper height
+                gripTr = rpy2tr(0,pi/2,0)*transl(0,0,-buffer);                      %pose for picking up top edge of tray
+                x = item.hitBox(2,2);                                          %Top edge of Tray
+                y = (item.hitBox(1,2) + item.hitBox(2,2))/2;              %Center of Tray
+                z = (item.hitBox(2,3) - item.hitBox(1,3))/2;                %center of Tray
+                pickUpPoint = [x y z];                                             %Point to place tray in conveyorbelts frame of reference
+                targetPosition = item.base*transl(pickUpPoint)*gripTr;             %get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > item > Global
             else
                 msg = ["Robot wasn't design to pick up",item.plyFile];
                 warning(msg);
             end
                 targetJoints = self.robot.model.ikcon(targetPosition,q0); %perform inverse kinematic for joint positions
                 disp('E05_Worker: Found target joint positions');
+                disp('E05_Worker: Target End effector pose:')
+                disp(targetPosition)
+                disp('E05_Worker: Auctual End effector pose:')
+                disp([self.robot.model.fkineUTS(targetJoints)])
                 disp('E05_Worker: Error for this position = ');
-                error = targetPosition- self.robot.model.fkineUTS(targetJoints);
+                error = self.robot.model.fkineUTS(targetJoints)- targetPosition;
                 disp(error);
                 qPath = jtraj(q0,targetJoints,steps);
         end
@@ -268,29 +314,42 @@ classdef E05_worker <handle
                 end
             end
             if(strncmpi(placement.plyFile,'Conveyor',8))                
-                if(strncmpi(item.plyFile,'Tray.ply',8))
-                    buffer = buffer + item.hitBox(2,1)/1.5 + self.gripper.getHeight();    %Distance in Z axis of end effector away from deposit point
-                    gripTr = rpy2tr(pi/2,pi/2,0)*transl(0,0,-(buffer));     %pose for placing tray down relative to deposit point
+                if(strncmpi(item.plyFile,'Tray',4))
+                    disp(['E05_Worker: Using gripper pose for Tray.'])
+                    buffer = buffer + item.hitBox(2,1)/1.5 + self.gripper.getHeight();    %Distance of final robot link away from deposit point = buffer + tray length/1.5 + gripperheight
+                    gripTr = rpy2tr(pi/2,pi/2,0)*transl(0,0,-(buffer));         %pose for placing tray down relative to deposit point
+                    temp= inv(placement.base)*self.robot.model.base.T;          %Calculate position of robot base in conveyors frame
+                    x = temp(1,4)-0.5;                                              %X position of robot base with -0.2 offset
+                    y = (placement.hitBox(1,2) + placement.hitBox(2,2))/2;      %Center of conveyor belt
+                    z = placement.hitBox(2,3)+0.01;                             %Top of conveyorbelt
+                    depositPoint = [x y z];                                     %Point to place tray in conveyorbelts frame of reference
+                    targetPosition = placement.base*transl(depositPoint)*gripTr;%get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > ConveyorBelt > Global
                 end
-                temp= self.robot.model.base.T*inv(placement.base);          %Calculate position of robot base in conveyors frame
-                x = temp(1,4) - 0.2;                                        %X position of robot base - 0.2 offset
-                y = (placement.hitBox(1,2) + placement.hitBox(2,2))/2;      %Center of conveyor belt
-                z = placement.hitBox(1,3)+0.01;                             %Top of conveyorbelt
-                depositPoint = [x y z];                                     %Point to place tray in conveyorbelts frame of reference
-                targetPosition = placement.base*transl(depositPoint)*gripTr; %get target pose for final arm link to align gripper properly in global frame. gripperTr > depositPoint > ConveyorBelt > Global
-            % elseif(strncmpi(placement.plyFile,'Tray.ply',4))
-            %     disp(['E05_Worker: Using gripper pose for tray.'])
-            %     buffer = buffer + (max(verts(:,1)));
-            %     gripTr = transl(-(self.gripper.getHeight()+buffer),0,0)*rpy2tr(0,pi/2,0); %pose for picking up top edge of tray
-            %     targetPosition = item.base*gripTr; %get target pose for final arm link to align gripper properly
+
+            elseif(strncmpi(placement.plyFile,'Tray.ply',4))
+                if(strncmpi(item.plyFile,'Mealbox',7))
+                    disp(['E05_Worker: Using gripper pose for Mealbox.'])
+                    buffer = buffer +item.hitBox(2,3) -0.02 +self.gripper.getHeight();         %Distance of final robot link away from deposit point = buffer + meal height + gripperheight
+                    gripTr = rpy2tr(0,pi,0)*transl(0,0,-(buffer));                           %pose for placing meal down relative to deposit point
+                    x = (placement.hitBox(1,2) + placement.hitBox(2,2)) + 0.1;  %Slightly offset from center aways from robot
+                    y = (placement.hitBox(1,2) + placement.hitBox(2,2))/2;      %Center of tray
+                    z = placement.hitBox(2,3);                                  %Top of tray
+                    depositPoint = [x y z];                                     %Point to place meal in tray's frame of reference
+                    targetPosition = placement.base*transl(depositPoint)*gripTr;%get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > Tray > Global
+                end
+
             else
                 msg = ["E05_Worker: I was not designed to place ",item.plyFile," onto ",placement.plyFile];
                 warning(msg);
             end
                 targetJoints = self.robot.model.ikcon(targetPosition,q0); %perform inverse kinematic for joint positions
                 disp('E05_Worker: Found target joint positions');
+                disp('E05_Worker: Target End effector pose:')
+                disp(targetPosition)
+                disp('E05_Worker: Auctual End effector pose:')
+                disp([self.robot.model.fkineUTS(targetJoints)])
                 disp('E05_Worker: Error for this position = ');
-                error = targetPosition- self.robot.model.fkineUTS(targetJoints);
+                error =self.robot.model.fkineUTS(targetJoints) - targetPosition;
                 disp(error);
                 qPath = jtraj(q0,targetJoints,steps);
         end
