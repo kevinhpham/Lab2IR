@@ -36,7 +36,7 @@ classdef Item < handle
             set(self.obj,'Vertices',transformedVertices(:,1:3));
             self.base = baseTr;
             self.plyFile = item;                
-            corner1 = [min(self.vertices(:,1)), min(self.vertices(:,2)), max(self.vertices(:,3))];  % A vector representing bottom corner of hitbox
+            corner1 = [min(self.vertices(:,1)), min(self.vertices(:,2)), min(self.vertices(:,3))];  % A vector representing bottom corner of hitbox
             corner2 = [max(self.vertices(:,1)), max(self.vertices(:,2)), max(self.vertices(:,3))];  % A vector representing the opposite top corner of hitbox
             self.hitBox = [corner1 ; corner2];    
         end
