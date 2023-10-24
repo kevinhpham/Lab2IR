@@ -109,6 +109,9 @@ package4 = FullStockTray(transl(-1.6,4,-0.3));
 packageBox1 = StockBox(transl(-3.8,4,-0.88));
 packageBox2 = StockBox(transl(-1.8,4,-0.88));
 
+% Insert Chef
+chef = ChefPerson(transl(-3.5,-3,0));
+
 %% Idea
 % Make a list of objects to be pushed vs not
 % Cell
