@@ -4,7 +4,7 @@ classdef E05_worker <handle
     properties
        robot; 
        gripper; 
-       speed = 1; %control speed factor of robo
+       collidables; %items to perform collision checking on
     end
 
     methods
@@ -32,6 +32,8 @@ classdef E05_worker <handle
            self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
            self.gripper.plot([0 0 0]);
            self.gripper.setDelay(0)
+
+           self.collidables = {};
         end
 
         %%Plots the workspace of the arm as a pointcloud and finds approximate volume
@@ -82,7 +84,7 @@ classdef E05_worker <handle
                 qGoal = [-pi/2 0 pi/3 pi/2 pi/2 0];
                 qPath = jtraj(q0,qGoal,steps);
             else
-                msg('E05_Worker: no midpath avaliable for this item')
+                msg= 'E05_Worker: no midpath avaliable for this item';
                 warning(msg)
             end
         end
@@ -105,7 +107,7 @@ classdef E05_worker <handle
                 qGoal = [pi/2 -pi/12 pi/3 0 pi/2 0];
                 qPath = jtraj(q0,qGoal,steps);
             else
-                msg('E05_Worker: no midpath avaliable for this item')
+                msg= 'E05_Worker: no midpath avaliable for this item';
                 warning(msg)
             end
 
@@ -159,24 +161,48 @@ classdef E05_worker <handle
                 qPath = [qPath1;qPath2;qPath3];
         end
 
-        function animateArm(self,qq,item)
-            %animate arm, gripper and item to move together.
+        function [collision] = animateArm(self,qq,item)
+            %animate arm, gripper and item to move together. returns true
+            %if any part of the arm or item will collides with items in
+            %"collidables"
             %To animate path smoothely, enter in jointsteps 1 by 1 with loop
              if nargin < 3
                  item = uint8.empty;
              end
+            collision = 0;
 
             if not(isempty(item)) %if there is an item
-                itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;     %Find item's tf relative to end effector's frame
-                self.robot.model.animate(qq);                                                       %Move robot to new joint position
-                self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));         %Update gripper base based on new end effector frame
-                self.gripper.animate(self.gripper.getPos());                                        %Move gripper to new base
+                %check for collisions
+                itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
                 itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
-                item.move(itemToGlobal);                                                            %Move item to new location
-            else    %if no item specified
-            self.robot.model.animate(qq);
-            self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
-            self.gripper.animate(self.gripper.getPos());
+                size(self.collidables)
+
+                if 0 < size(self.collidables)
+                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
+                    check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));          %check if gripper will collide once arm moves
+                    check(3) = CollisionDetection.itemsIsCollision(item,self.collidables,itemToGlobal);           %check if item will collide
+                    collision = any(check);                                %collision will return true if anything is colliding
+                end
+                
+                if collision == 0                                          %If there is no collision, proceed to move
+                    self.robot.model.animate(qq);                          %Move robot to new joint position
+                    self.gripper.setBase(self.robot.model.fkineUTS(qq));   %Set new gripper base
+                    self.gripper.animate(self.gripper.getPos());           %Move gripper to new base
+                    item.move(itemToGlobal);                               %Move item to new location
+                end
+
+            else    %if there is no item
+                if 0 < size(self.collidables)
+                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide
+                    check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));            %check if gripper will collide once arm moves
+                    collision = any(check);                                                             %return true if there is a collision
+                end
+
+                if collision == 0  %No collision, move arm
+                    self.robot.model.animate(qq);
+                    self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
+                    self.gripper.animate(self.gripper.getPos());
+                end
             end
         end
 
@@ -242,7 +268,18 @@ classdef E05_worker <handle
             disp('E05_Worker: Here are the joint velocity errors:')
             %display(errorValue.')
         end
+
+        function addCollidables(self,items)
+            if iscell(items)    %if items are in a cell
+                self.collidables = horzcat(self.collidables,items);
+            end
+
+            if isobject(items)  %if items in array
+                self.collidables = horzcat(self.collidables,(num2cell(items)));
+            end
+        end
     end
+    
 
     methods(Hidden)
         function [qPath] = searchPickup(self,item,q0,buffer,steps)
@@ -266,19 +303,19 @@ classdef E05_worker <handle
             %Find out what item is being picked up and the corresponding gripper
             %pose to pick up that item.
             if(strncmpi(item.plyFile,'MealBox.ply',7))
-                disp(['E05_Worker: Using gripper pose for mealbox'])
+                disp('E05_Worker: Using gripper pose for mealbox')
                 buffer = buffer-0.02 + self.gripper.getHeight();
                 gripTr = transl(0.05,0,buffer)*rpy2tr(pi,0,pi/2); %pose for picking up mealboxes
                 [~,index] = max(verts(:,3)); %Look for highest point in list of verticies, which is the handle of box
                 targetPosition = item.base*transl(verts(index,1:3))*gripTr; %get target pose for final arm link to align gripper properly
             
             elseif(strncmpi(item.plyFile,'Tray.ply',4))
-                disp(['E05_Worker: Using gripper pose for tray'])
-                buffer = buffer + (item.hitBox(2,1))*1.5 + self.gripper.getHeight();  % distance between arm end link and pickup =buffer + traylength + gripper height
+                disp('E05_Worker: Using gripper pose for tray')
+                buffer = buffer + (item.corners(2,1))*1.5 + self.gripper.getHeight();  % distance between arm end link and pickup =buffer + traylength + gripper height
                 gripTr = rpy2tr(0,pi/2,0)*transl(0,0,-buffer);                      %pose for picking up top edge of tray
-                x = item.hitBox(2,2);                                          %Top edge of Tray
-                y = (item.hitBox(1,2) + item.hitBox(2,2))/2;              %Center of Tray
-                z = (item.hitBox(2,3) - item.hitBox(1,3))/2;                %center of Tray
+                x = item.corners(2,2);                                          %Top edge of Tray
+                y = (item.corners(1,2) + item.corners(2,2))/2;              %Center of Tray
+                z = (item.corners(2,3) - item.corners(1,3))/2;                %center of Tray
                 pickUpPoint = [x y z];                                             %Point to place tray in conveyorbelts frame of reference
                 targetPosition = item.base*transl(pickUpPoint)*gripTr;             %get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > item > Global
             else
@@ -315,25 +352,25 @@ classdef E05_worker <handle
             end
             if(strncmpi(placement.plyFile,'Conveyor',8))                
                 if(strncmpi(item.plyFile,'Tray',4))
-                    disp(['E05_Worker: Using gripper pose for Tray.'])
-                    buffer = buffer + item.hitBox(2,1)/1.5 + self.gripper.getHeight();    %Distance of final robot link away from deposit point = buffer + tray length/1.5 + gripperheight
+                    disp('E05_Worker: Using gripper pose for Tray.')
+                    buffer = buffer + item.corners(2,1)/1.5 + self.gripper.getHeight();    %Distance of final robot link away from deposit point = buffer + tray length/1.5 + gripperheight
                     gripTr = rpy2tr(pi/2,pi/2,0)*transl(0,0,-(buffer));         %pose for placing tray down relative to deposit point
                     temp= inv(placement.base)*self.robot.model.base.T;          %Calculate position of robot base in conveyors frame
                     x = temp(1,4)-0.5;                                              %X position of robot base with -0.2 offset
-                    y = (placement.hitBox(1,2) + placement.hitBox(2,2))/2;      %Center of conveyor belt
-                    z = placement.hitBox(2,3)+0.01;                             %Top of conveyorbelt
+                    y = (placement.corners(1,2) + placement.corners(2,2))/2;      %Center of conveyor belt
+                    z = placement.corners(2,3)+0.01;                             %Top of conveyorbelt
                     depositPoint = [x y z];                                     %Point to place tray in conveyorbelts frame of reference
                     targetPosition = placement.base*transl(depositPoint)*gripTr;%get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > ConveyorBelt > Global
                 end
 
             elseif(strncmpi(placement.plyFile,'Tray.ply',4))
                 if(strncmpi(item.plyFile,'Mealbox',7))
-                    disp(['E05_Worker: Using gripper pose for Mealbox.'])
-                    buffer = buffer +item.hitBox(2,3) -0.02 +self.gripper.getHeight();         %Distance of final robot link away from deposit point = buffer + meal height + gripperheight
+                    disp('E05_Worker: Using gripper pose for Mealbox.')
+                    buffer = buffer +item.corners(2,3) -0.02 +self.gripper.getHeight();         %Distance of final robot link away from deposit point = buffer + meal height + gripperheight
                     gripTr = rpy2tr(0,pi,0)*transl(0,0,-(buffer));                           %pose for placing meal down relative to deposit point
-                    x = (placement.hitBox(1,2) + placement.hitBox(2,2)) + 0.1;  %Slightly offset from center aways from robot
-                    y = (placement.hitBox(1,2) + placement.hitBox(2,2))/2;      %Center of tray
-                    z = placement.hitBox(2,3);                                  %Top of tray
+                    x = (placement.corners(1,2) + placement.corners(2,2)) + 0.1;  %Slightly offset from center aways from robot
+                    y = (placement.corners(1,2) + placement.corners(2,2))/2;      %Center of tray
+                    z = placement.corners(2,3);                                  %Top of tray
                     depositPoint = [x y z];                                     %Point to place meal in tray's frame of reference
                     targetPosition = placement.base*transl(depositPoint)*gripTr;%get target pose to move gripper to in global frame. frame transformation = gripperTr > depositPoint > Tray > Global
                 end
