@@ -17,15 +17,18 @@ classdef ConveyorClass < Item
             item.updateDetectionZone();         % Based on the input, feed into 'updateDetectionZone() method
         end
 
-        % Function: Takes in multiple items and pushes them along the conveyer belt
+        % Function: Takes in items and pushes them along the conveyer belt
         function push(self, items)  
-            if iscell(items)
-                cellfun(@self.pushIndividual, items);
-            end
-
-            if isobject(items)
-                arrayfun(@self.pushIndividual,items)
-            end
+                if iscell(items)    %if items are in a cell
+                    cellfun(@self.pushIndividual, items);
+                end
+                if isobject(items)
+                   if 1 < size(items)      %if there is more then 1 item
+                        arrayfun(@self.pushIndividual,items)
+                   else
+                    self.pushIndividual(items)
+                   end
+                end
 
         end
 
