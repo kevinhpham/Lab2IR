@@ -12,7 +12,7 @@ view(3)
 % Importing tray and components
 tray = Tray(transl(0,0,0));
 oJuice = JuiceBox(transl(0.1,0.05,0), 'orange');
-vMeal = MealBox(transl(-0.09,-0.05,0), 'meat');
+vMeal = MealBox(transl(-0.09,-0.05,0), 'veg');
 cutlery = Cutlery(transl(0.03,0,0));
 
 %% Make a tray storage
@@ -215,3 +215,42 @@ juice9.move((transl(-3.96,-0.09,0.02))*(rpy2tr(0,0,pi/2)));
 cutlery9 = Cutlery(transl(-4.05,0,0.03));
 meal9 = MealBox(transl(0,0,0), 'v');
 meal9.move((transl(-3.94,0.03,0.03))*(rpy2tr(0,0,pi/2)));
+
+%% Juice Box Scene
+
+clf
+camlight
+axis equal;
+hold on 
+
+axis([-5, 0, 3, 5, -0.88, 3])
+view(3)
+
+% Import the floor/ wallpapers
+surf([-5,-5;5,5] ...
+      ,[-5,5;-5,5] ...
+      ,[-0.88,-0.88;-0.88,-0.88] ...
+      ,'CData',imread('Floor.jpg') ...
+      ,'FaceColor','texturemap');
+
+%Tray Storage
+trayStorage = TrayStorage(transl(0,0,0));
+trayStorage.move((transl(1.95,-3.6,0))*(rpy2tr(0,0,pi/2)));
+trayStorage2 = TrayStorage(transl(0,0,0));
+trayStorage2.move((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2)));
+trayStorage3 = TrayStorage(transl(0,0,0));
+trayStorage3.move((transl(3.85,-1.6,0))*(rpy2tr(0,0,pi/2)));
+
+%Offload Bay
+offloadBay1 = OffloadBay(transl(2.5,4,-0.88));
+offloadBay2 = OffloadBay(transl(-10,4,-0.88));
+
+% OffloadBay
+package1 = FullStockTray(transl(-4.6,4,-0.3));
+package2 = FullStockTray(transl(-3.6,4,-0.3));
+package3 = FullStockTray(transl(-2.6,4,-0.3));
+package4 = FullStockTray(transl(-1.6,4,-0.3));
+
+% Package Boxes
+packageBox1 = StockBox(transl(-3.8,4,-0.88));
+packageBox2 = StockBox(transl(-1.8,4,-0.88));

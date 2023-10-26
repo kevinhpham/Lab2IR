@@ -21,6 +21,7 @@ camlight
 
 %worker.plotWorkspace();
 axis equal
+%axis([-5, -0.5, -5, -3, -0.88, 3]) %Uncomment this for video 
 for i = 1:length(trays)
     %Create joint planning path to move arm to tray
     meals{i} = MealBox(mealConveyor(1).base)    %create meals on conveyors
