@@ -16,7 +16,6 @@ classdef RG6_Gripper <handle
         if nargin < 1			
 			baseTr = eye(4);				
         end
-
         % Fkine UTS is used as it is faster at calculating forward
         % kinematics
         self.left.base = self.left.base.T * baseTr;
@@ -40,7 +39,11 @@ classdef RG6_Gripper <handle
 
      function setBase(self,baseTr) 
         self.left.base = baseTr;
-        self.right.base =baseTr*rpy2tr(0,0,pi);
+        self.right.base = baseTr*rpy2tr(0,0,pi);
+     end
+
+     function [base] = getBase(self) 
+         base = self.left.base.T;
      end
 
     % Function: Animate gripper
@@ -82,6 +85,26 @@ classdef RG6_Gripper <handle
     function [qLims] = getQlim(self)
         qLims = self.left.qlim();
     end
+    
+    %check if gripper fingers will collide with an item object
+    function [result] = isCollision(self,item,tr,qMatrix)
+        if nargin<4
+            qMatrix = self.getPos;      %default: use current pose
+            if nargin<3
+                tr = self.getBase;      %default: use current base
+            end
+        end
+        currentBase = self.getBase;     %Save current gripper base
+        self.setBase(tr);                %temporarily set gripper base to planned location
+        check(1) = CollisionDetection.robotIsCollision(self.left,qMatrix,item); %check if gripper fingers are in collision
+        check(2) = CollisionDetection.robotIsCollision(self.right,qMatrix,item);
+        result = any(check);            %if any gripper finger is in collision, return true
+        self.setBase(currentBase);     %Reset gripper base back to normal
+        if result == true
+            disp(['CollisionDetection has detected upcoming collision with RG6 Gripper',])
+        end
+    end
+
  end
 
  methods(Hidden)
