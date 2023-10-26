@@ -11,7 +11,7 @@ classdef Hitbox < handle
     methods
         function self = Hitbox(minCorner,maxCorner,itemBase)
             buffer = 0.02;                                                                  %Buffer zone so that item is fully enveloped by hitbox
-            [vertex,face,faceNormal] = RectangularPrism(minCorner-buffer,maxCorner+buffer); %Create rectangular prism, uses RectangularPrism function from week 5 tutorial
+            [vertex,face,faceNormal] = self.RectangularPrism(minCorner-buffer,maxCorner+buffer); %Create rectangular prism, uses RectangularPrism function from week 5 tutorial
             vertex = ([vertex,ones(size(vertex,1),1)])*itemBase.';                          %Converts vector arrays into homogenous form so it can be converted to item's parent frame
             faceNormal = ([faceNormal,ones(size(faceNormal,1),1)])*itemBase.';
             self.vertexes = vertex(:,1:3);                                                  %converting vector arrays back to non homogenous form and store them in object fields
@@ -21,7 +21,7 @@ classdef Hitbox < handle
         
         function update(self,minCorner,maxCorner,itemBase)
             %Used to update the position of the hitbox
-            [vertex,face,faceNormal] = RectangularPrism(minCorner,maxCorner);           %Create rectangular prism, uses RectangularPrism function from week 5 tutorial
+            [vertex,face,faceNormal] = self.RectangularPrism(minCorner,maxCorner);           %Create rectangular prism, uses RectangularPrism function from week 5 tutorial
             vertex = ([vertex,ones(size(vertex,1),1)])*itemBase.';                      %Converts vector arrays into homogenous form so it can be converted to item's parent frame
             faceNormal = ([faceNormal,ones(size(faceNormal,1),1)])*itemBase.';
             self.vertexes = vertex(:,1:3);                                              %converting vector arrays back to non homogenous form and store them in object fields
@@ -36,7 +36,7 @@ classdef Hitbox < handle
 
         end
 
-        function [vertex,face,faceNormals] = RectangularPrism(lower,upper)
+        function [vertex,face,faceNormals] = RectangularPrism(self,lower,upper)
             %%RectangularPrism function taken from week 5 Lab. Creates a
             %%rectangular prism using the lower and upper corners of the
             %%prism. lower and upper are 1x3 position vectors.
