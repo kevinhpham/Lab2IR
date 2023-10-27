@@ -1,3 +1,4 @@
+
 %% This script can be used to create visuals for the promotional video
 
 %% Create a meal tray
@@ -263,33 +264,15 @@ axis equal;
 hold on 
 
 % Set the axis and view to isometric
-axis([-5, 5, -5, 5, -0.88, 3])
+%axis([-3, 3, -1, -5, -0.88, 3])
 view(3)
 
 % Import the floor/ wallpapers
-surf([-5,-5;5,5] ...
-      ,[-5,5;-5,5] ...
-      ,[-0.88,-0.88;-0.88,-0.88] ...
-      ,'CData',imread('Floor.jpg') ...
-      ,'FaceColor','texturemap');
-
-surf([-5,5;-5,5] ...
-      ,[5,5;5,5] ...
-      ,[3,3;-0.88,-0.88] ...
-      ,'CData',imread('WallPaperWords.jpg') ...
-      ,'FaceColor','texturemap');
-
-surf([5,5;5,5] ...
-      ,[5,-5;5,-5] ...
-      ,[3,3;-0.88,-0.88] ...
-      ,'CData',imread('WallPaper.jpg') ...
-      ,'FaceColor','texturemap');
-
 
 % Dobot Setup
-dobotTable = RobotTable(transl(-1.65,-3.6,0));
-dobot = DobotMagician(dobotTable.base*transl(0,0,0));
+%dobotTable = RobotTable(transl(-1.65,-3.6,0));
+%dobot = DobotMagician(dobotTable.base*transl(0,0,0));
 
 % E05 Setup
-e05Table = MealRobotTable(transl(1.45,-3.6,0));
-worker = E05_worker(e05Table.base*transl(0,0,0));
+%e05Table = MealRobotTable(transl(1.45,-3.6,0));
+worker = E05_worker;
