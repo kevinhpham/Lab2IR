@@ -24,6 +24,7 @@ robot.plot(q);          % Plot robot in initial configuration
 robot.delay = 0.001;    % Set smaller delay when animating
 set(HF,'Position',[0.1 0.1 0.8 0.8]);
 minManipMeasure = 0.3;  %Minimum manipulativity before DLS kicks in
+dt = 0.15; %time step
 while(1)
     
     % read joystick
@@ -50,6 +51,6 @@ while(1)
     robot.animate(q);  
     
     % wait until loop time elapsed
-    pause(0.15)
+    pause(dt)
 end
       

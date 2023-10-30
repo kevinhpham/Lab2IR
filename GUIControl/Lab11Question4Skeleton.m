@@ -1,11 +1,11 @@
 %% Robotics
 % Lab 11 - Question 4 skeleton code
+%Main Difference between question 2 and 4 is 4 uses end effector frame as reference to
+%control arm.
 
-%% setup joystick
-id = 1; % Note: may need to be changed if multiple joysticks present
-joy = vrjoystick(id);
-caps(joy) % display joystick information
-
+%% setup teach pendant
+close
+pendant = VirtualTeachPendant;
 
 %% Set up robot
 mdl_puma560;                    % Load Puma560
@@ -20,36 +20,40 @@ HF = figure(1);         % Initialise figure to display robot
 robot.plot(q);          % Plot robot in initial configuration
 robot.delay = 0.001;    % Set smaller delay when animating
 set(HF,'Position',[0.1 0.1 0.8 0.8]);
-
-duration = 30;  % Set duration of the simulation (seconds)
-dt = 0.15;      % Set time step for simulation (seconds)
-
-n = 0;  % Initialise step count to zero 
-tic;    % recording simulation start time
-while( toc < duration)
+minManipMeasure = 0.3;  %Minimum manipulativity before DLS kicks in
+dt = 0.15; %time step
+while(1)
     
-    n=n+1; % increment step count
-
     % read joystick
-    [axes, buttons, povs] = read(joy);
-       
+    wrench = pendant.read;
     % -------------------------------------------------------------
     % YOUR CODE GOES HERE
-    % 1 - turn joystick input into an end-effector force measurement
-    % 2 - use simple admittance scheme to convert force measurement into
-    % velocity command
-    % 2 - use J inverse to calculate joint velocity
+    % 1 - turn joystick input into an end-effector force measurement command
+        x = wrench(1:6)
+
+        % 2 - use simple admittance scheme to convert force measurement into
+        % velocity command
+        Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]); % admittance gain matrix
+        dx = Ka*x; % convert wrench into end-effector velocity command
+        % 3 - use J inverse to calculate joint velocity
+        J = robot.jacobe(q)
+    
+        m = sqrt(det(J*J'))                         %Calculate current measure of manipulativity
+           if m < minManipMeasure                      %if below threshhold manipulativity
+                lambda = (1-(m/minManipMeasure)^2)*0.1;
+                qdot = inv((J'*J+lambda*eye(6)))*J'*x   %Use dampled least squared
+           else
+           qdot = inv(J)*x                            % Solve velocitities via RMRC
+           end
+
     % 3 - apply joint velocity to step robot joint angles 
     % -------------------------------------------------------------
-    
+        q = robot.getpos + qdot.'*dt
     % Update plot
     robot.animate(q);  
     
     % wait until loop time elapsed
-    if (toc > dt*n)
-        warning('Loop %i took too much time - consider increating dt',n);
-    end
-    while (toc < dt*n); % wait until loop time (dt) has elapsed 
-    end
+    pause(dt)
 end
       
+
