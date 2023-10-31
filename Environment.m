@@ -5,7 +5,7 @@ classdef Environment <handle
         % SetupStaticEnvironment()
         % SetupNonStaticEnvironment()
     
-    properties
+    properties % Defining variables
         trayStorage;
         trays;
         glassBarrier;
@@ -35,20 +35,19 @@ classdef Environment <handle
     end
     
     methods
-        function self = Environment()
-            self.trayStorage
-            self.SetupStaticEnvironment();
-            self.SetupNonStaticEnvironment();
+        function self = Environment() % Defining functions
+            self.SetupStaticEnvironment(); % Populates workspace with static items
+            self.SetupNonStaticEnvironment(); % Populates workspace with non-static items
         end
 
-         
-        function SetupStaticEnvironment(self)
-            camlight;
-            hold on;
+        function SetupStaticEnvironment(self) % The purpose of this function is to setup the static environment
+            camlight; % Setup lighting
+            hold on; % Maintain set-up
 
-            axis([-5, 5, -5, 5, -0.88, 3])
-            view(3)
+            axis([-5, 5, -5, 5, -0.88, 3]) % Setting axis of the workspace
+            view(3) % Set to isometric view
 
+            % Import in wallpaper and floor
             surf([-5,-5;5,5] ...
                   ,[-5,5;-5,5] ...
                   ,[-0.88,-0.88;-0.88,-0.88] ...
@@ -67,7 +66,6 @@ classdef Environment <handle
                   ,'CData',imread('WallPaper.jpg') ...
                   ,'FaceColor','texturemap');
 
-            % The purpose of this function is to setup the static environment
             % Empty tray storage in the environment (x2)
             self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
             self.trayStorage(2) = TrayStorage((transl(3.85,-1.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 2
@@ -197,10 +195,7 @@ classdef Environment <handle
 
         end 
 
-        % The purpose of this function is to setup the non-static
-        % environment
-        function SetupNonStaticEnvironment(self)
-            % Non Static Tray Storage
+        function SetupNonStaticEnvironment(self) % The purpose of this function is to setup the non-static (movable) items in the environment
             camlight;
             hold on;
 
@@ -211,8 +206,7 @@ classdef Environment <handle
             self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
             self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
             self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
-                                                   % Allows tray items to
-                                                   % be pushed
+                                                   % Allows tray items to be pushed
 
             % Main conveyor for food
             self.trayConveyor = Conveyor2(transl(0,-4,0)); 
@@ -242,6 +236,5 @@ classdef Environment <handle
             self.e05Robot = E05_worker(self.e05Table.base*transl(0,0,0));
 
         end
-
     end
 end
