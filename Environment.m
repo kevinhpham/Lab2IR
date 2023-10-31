@@ -1,15 +1,9 @@
 classdef Environment <handle
     % The purpose of this class is to make the environment
     % The class differentiates between a static and non-static environment
-    % This is achieved through two methods. 
-
-    % Static Items Only
-    % No items on conveyor
-    % No conveyors
-    % No robots
-    % Tray racks - just the one near robot is non static
-    % May want people to walk around.
-    % Make this a class.
+    % This is achieved through two functions:
+        % SetupStaticEnvironment()
+        % SetupNonStaticEnvironment()
     
     properties
         trayStorage;
@@ -26,6 +20,18 @@ classdef Environment <handle
         oJuiceStock;
         vMealStock;
         mMealStock;
+        trayConveyor;
+        bJuiceConveyor;
+        cutleryConveyor;
+        oJuiceConveyor;
+        vMealConveyor;
+        mMealConveyor;
+        chefPerson;
+        dobot;
+        e05Robot;
+        dobotTable;
+        e05Table;
+        pushables;
     end
     
     methods
@@ -37,7 +43,6 @@ classdef Environment <handle
 
          
         function SetupStaticEnvironment(self)
-
             camlight;
             hold on;
 
@@ -112,7 +117,7 @@ classdef Environment <handle
             % Offload Bay Display Stock
             % Blackcurrent Juice Stock
             self.bJuiceStock(1) = JuiceBox(transl(-3.6,4.7,0.02), 'b');
-            self.bJuiceStock(2) = JuiceBox(transl(-3.8,4.7,0.02), 'b');
+            self.bJuiceStock(2) = JuiceBox  (transl(-3.8,4.7,0.02), 'b');
             self.bJuiceStock(3) = JuiceBox(transl(-4.0,4.7,0.02), 'b');
             self.bJuiceStock(4)= JuiceBox(transl(-4.2,4.7,0.02), 'b');
             self.bJuiceStock(5) = JuiceBox(transl(-4.4,4.7,0.02), 'b');
@@ -195,17 +200,48 @@ classdef Environment <handle
         % The purpose of this function is to setup the non-static
         % environment
         function SetupNonStaticEnvironment(self)
-            % Insert information here. 
-            self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy 2tr(0,0,pi/2))); % Defines the position of the tray storage
-            self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
-            
-        end
+            % Non Static Tray Storage
+            camlight;
+            hold on;
 
-        %function CreateMeal(self)
-            % get robot to make a singular meal tray
-            % animate workflow
-            % specify if it is meat/veg, orange or blackcurrent juice. 
-        %end
+            axis([-5, 5, -5, 5, -0.88, 3])
+            view(3)
+
+            % Main tray storage for robot to access to create trays
+            self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
+            self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
+            self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
+                                                   % Allows tray items to
+                                                   % be pushed
+
+            % Main conveyor for food
+            self.trayConveyor = Conveyor2(transl(0,-4,0)); 
+
+            % Delivery Conveyors
+            self.bJuiceConveyor = ConveyorD((transl(-2,-0.8,0))*(rpy2tr(0,0,pi/2)));
+            self.cutleryConveyor = ConveyorD((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
+            self.oJuiceConveyor = ConveyorD((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
+            self.vMealConveyor = ConveyorD((transl(1.3,-0.4,0))*(rpy2tr(0,0,pi/2)));
+            self.mMealConveyor = ConveyorD((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
+
+            % Chef People
+            self.chefPerson(1) = ChefPerson(transl(-2.3,2.5,-0.2));
+            self.chefPerson(2) = ChefPerson(transl(-1.6,2.9,-0.2));
+            self.chefPerson(3) = ChefPerson(transl(-1,2.5,-0.2));
+            self.chefPerson(4) = ChefPerson(transl(1.1, 2.8,-0.2));
+            self.chefPerson(5) = ChefPerson(transl(1.8, 2.8,-0.2));
+            self.pushables = horzcat(self.pushables, num2cell(self.chefPerson)); % Adds chefPerson to pushables cell array
+                                                                                 % Allows both trays and chefPeople to be 
+                                                                                 % pushed at the same time.
+
+            % Robots + Tables
+            self.dobotTable = RobotTable(transl(-1.65,-3.6,0)); % Table for Dobot
+            self.dobot = DobotMagician(self.dobotTable.base*transl(0,0,0));
+
+            self.e05Table = MealRobotTable(transl(1.45,-3.6,0)); % Table for e05
+            self.e05Robot = E05_worker(self.e05Table.base*transl(0,0,0));
+
+        end
 
     end
 end
