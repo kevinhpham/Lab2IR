@@ -13,7 +13,7 @@ classdef E05_worker <handle
             if nargin < 1			
 			    basetr = eye(4);				
             end
-            %Sets up Linear UR3
+            %Sets up a E05_L
             hold on
             self.robot = E05_L(basetr);
             self.robot.model.offset = [0 pi/2 -pi/3 0 0 0];
