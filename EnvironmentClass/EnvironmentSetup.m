@@ -1,8 +1,8 @@
-%% This class will be used to set-up the environment
-% It is derived from the TestEnvironment '.m' file.
+%% This script is used to show to setuup of static and non-static items
 
 %% Setting the Environment
 % Clear the figures & set up the conditions for the environment
+
 clf
 camlight
 axis equal;
@@ -41,7 +41,6 @@ juiceConveyorCenter.move((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
 juiceConveyorRight = ConveyorD(transl(0,0,0));
 juiceConveyorRight.move((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
 dobotTable = RobotTable(transl(-1.65,-3.6,0));
-dobot = DobotMagician(dobotTable.base*transl(0,0,0));
 
 % E05 Setup
 mealConveyorLeft = ConveyorD(transl(0,0,0));
@@ -49,7 +48,6 @@ mealConveyorLeft.move((transl(1.3,-0.4,0))*(rpy2tr(0,0,pi/2)));
 mealConveyorRight = ConveyorD(transl(0,0,0));
 mealConveyorRight.move((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
 e05Table = MealRobotTable(transl(1.45,-3.6,0));
-worker = E05_worker(e05Table.base*transl(0,0,0));
 
 % Area Dividers
 barrierLeft1 = GlassBarrier(transl(-4,-1,-0.9));
@@ -192,165 +190,3 @@ chef2 = ChefPerson(transl(-1.6,2.9,-0.2));
 chef3 = ChefPerson(transl(-1,2.5,-0.2));
 chef4 = ChefPerson(transl(1.1, 2.8,-0.2));
 chef5 = ChefPerson(transl(1.8, 2.8,-0.2));
-
-% Insert Orange Juices
-oJuice1 = JuiceBox(transl(-1.3, 2, 0.02), 'o');
-oJuice2 = JuiceBox(transl(-1.3, 1.8, 0.02), 'o');
-oJuice3 = JuiceBox(transl(-1.3, 1.6, 0.02), 'o');
-oJuice4 = JuiceBox(transl(-1.3, 1.4, 0.02), 'o');
-oJuice5 = JuiceBox(transl(-1.3, 1.2, 0.02), 'o');
-oJuice6 = JuiceBox(transl(-1.3, 1.0, 0.02), 'o');
-oJuice7 = JuiceBox(transl(-1.3, 0.8, 0.02), 'o');
-oJuice8 = JuiceBox(transl(-1.3, 0.6, 0.02), 'o');
-oJuice9 = JuiceBox(transl(-1.3, 0.4, 0.02), 'o');
-oJuice10 = JuiceBox(transl(-1.3, 0.2, 0.02), 'o');
-oJuice11 = JuiceBox(transl(-1.3, 0, 0.02), 'o');
-oJuice12 = JuiceBox(transl(-1.3, -0.2, 0.02), 'o');
-oJuice13 = JuiceBox(transl(-1.3, -0.4, 0.02), 'o');
-oJuice14 = JuiceBox(transl(-1.3, -0.6, 0.02), 'o');
-oJuice15 = JuiceBox(transl(-1.3, -0.8, 0.02), 'o');
-oJuice16 = JuiceBox(transl(-1.3, -1, 0.02), 'o');
-oJuice17 = JuiceBox(transl(-1.3, -1.2, 0.02), 'o');
-oJuice18 = JuiceBox(transl(-1.3, -1.4, 0.02), 'o');
-oJuice19 = JuiceBox(transl(-1.3, -1.6, 0.02), 'o');
-oJuice20 = JuiceBox(transl(-1.3, -1.8, 0.02), 'o');
-oJuice21 = JuiceBox(transl(-1.3, -2, 0.02), 'o');
-oJuice22 = JuiceBox(transl(-1.3, -2.2, 0.02), 'o');
-oJuice23 = JuiceBox(transl(-1.3, -2.4, 0.02), 'o');
-oJuice24 = JuiceBox(transl(-1.3, -2.6, 0.02), 'o');
-oJuice25 = JuiceBox(transl(-1.3, -2.8, 0.02), 'o');
-oJuice26 = JuiceBox(transl(-1.3, -3, 0.02), 'o');
-oJuice27 = JuiceBox(transl(-1.3, -3.2, 0.02), 'o');
-oJuice28 = JuiceBox(transl(-1.3, -3.4, 0.02), 'o');
-oJuice29 = JuiceBox(transl(-1.3, -3.6, 0.02), 'o');
-
-% Insert Blackcurrent Juice
-bJuice1 = JuiceBox(transl(-2.0, 2, 0.02), 'b');
-bJuice2 = JuiceBox(transl(-2.0, 1.8, 0.02), 'b');
-bJuice3 = JuiceBox(transl(-2.0, 1.6, 0.02), 'b');
-bJuice4 = JuiceBox(transl(-2.0, 1.4, 0.02), 'b');
-bJuice5 = JuiceBox(transl(-2.0, 1.2, 0.02), 'b');
-bJuice6 = JuiceBox(transl(-2.0, 1.0, 0.02), 'b');
-bJuice7 = JuiceBox(transl(-2.0, 0.8, 0.02), 'b');
-bJuice8 = JuiceBox(transl(-2.0, 0.6, 0.02), 'b');
-bJuice9 = JuiceBox(transl(-2.0, 0.4, 0.02), 'b');
-bJuice10 = JuiceBox(transl(-2.0, 0.2, 0.02), 'b');
-bJuice11 = JuiceBox(transl(-2.0, 0, 0.02), 'b');
-bJuice12 = JuiceBox(transl(-2.0, -0.2, 0.02), 'b');
-bJuice13 = JuiceBox(transl(-2.0, -0.4, 0.02), 'b');
-bJuice14 = JuiceBox(transl(-2.0, -0.6, 0.02), 'b');
-bJuice15 = JuiceBox(transl(-2.0, -0.8, 0.02), 'b');
-bJuice16 = JuiceBox(transl(-2.0, -1, 0.02), 'b');
-bJuice17 = JuiceBox(transl(-2.0, -1.2, 0.02), 'b');
-bJuice18 = JuiceBox(transl(-2.0, -1.4, 0.02), 'b');
-bJuice19 = JuiceBox(transl(-2.0, -1.6, 0.02), 'b');
-bJuice20 = JuiceBox(transl(-2.0, -1.8, 0.02), 'b');
-bJuice21 = JuiceBox(transl(-2.0, -2, 0.02), 'b');
-bJuice22 = JuiceBox(transl(-2.0, -2.2, 0.02), 'b');
-bJuice23 = JuiceBox(transl(-2.0, -2.4, 0.02), 'b');
-bJuice24 = JuiceBox(transl(-2.0, -2.6, 0.02), 'b');
-bJuice25 = JuiceBox(transl(-2.0, -2.8, 0.02), 'b');
-bJuice26 = JuiceBox(transl(-2.0, -3, 0.02), 'b');
-bJuice27 = JuiceBox(transl(-2.0, -3.2, 0.02), 'b');
-bJuice28 = JuiceBox(transl(-2.0, -3.4, 0.02), 'b');
-bJuice29 = JuiceBox(transl(-2.0, -3.6, 0.02), 'b');
-
-% Insert Cutlery
-cutlery1 = Cutlery(transl(-1.65, 2.4, 0.02));
-cutlery2 = Cutlery(transl(-1.65, 2.1, 0.02));
-cutlery3 = Cutlery(transl(-1.65, 1.8, 0.02));
-cutlery4 = Cutlery(transl(-1.65, 1.5, 0.02));
-cutlery5 = Cutlery(transl(-1.65, 1.2, 0.02));
-cutlery6 = Cutlery(transl(-1.65, 0.9, 0.02));
-cutlery7 = Cutlery(transl(-1.65, 0.6, 0.02));
-cutlery8 = Cutlery(transl(-1.65, 0.6, 0.02));
-cutlery9 = Cutlery(transl(-1.65, 0.3, 0.02));
-cutlery10 = Cutlery(transl(-1.65, 0, 0.02));
-cutlery11 = Cutlery(transl(-1.65, -0.3, 0.02));
-cutlery12 = Cutlery(transl(-1.65, -0.6, 0.02));
-cutlery13 = Cutlery(transl(-1.65, -0.9, 0.02));
-cutlery14 = Cutlery(transl(-1.65, -1.2, 0.02));
-cutlery15 = Cutlery(transl(-1.65, -1.5, 0.02));
-cutlery16 = Cutlery(transl(-1.65, -1.8, 0.02));
-cutlery17 = Cutlery(transl(-1.65, -2.1, 0.02));
-cutlery18 = Cutlery(transl(-1.65, -2.4, 0.02));
-cutlery19 = Cutlery(transl(-1.65, -2.7, 0.02));
-cutlery20 = Cutlery(transl(-1.65, -3.0, 0.02));
-cutlery21 = Cutlery(transl(-1.65, -3.3, 0.02));
-cutlery22 = Cutlery(transl(-1.65, -3.5, 0.02));
-
-% Insert Veg Meal
-vMeal1= MealBox(transl(1.3, 2.3, 0.02), 'v');
-vMeal2= MealBox(transl(1.3, 2.1, 0.02), 'v');
-vMeal3= MealBox(transl(1.3, 1.9, 0.02), 'v');
-vMeal4= MealBox(transl(1.3, 1.7, 0.02), 'v');
-vMeal5= MealBox(transl(1.3, 1.5, 0.02), 'v');
-vMeal6= MealBox(transl(1.3, 1.3, 0.02), 'v');
-vMeal7= MealBox(transl(1.3, 1.1, 0.02), 'v');
-vMeal8= MealBox(transl(1.3, 0.9, 0.02), 'v');
-vMeal9= MealBox(transl(1.3, 0.7, 0.02), 'v');
-vMeal10= MealBox(transl(1.3, 0.5, 0.02), 'v');
-vMeal11= MealBox(transl(1.3, 0.3, 0.02), 'v');
-vMeal12= MealBox(transl(1.3, 0.1, 0.02), 'v');
-vMeal13= MealBox(transl(1.3, -0.1, 0.02), 'v');
-vMeal14= MealBox(transl(1.3, -0.3, 0.02), 'v');
-vMeal15= MealBox(transl(1.3, -0.5, 0.02), 'v');
-vMeal16= MealBox(transl(1.3, -0.7, 0.02), 'v');
-vMeal17= MealBox(transl(1.3, -0.9, 0.02), 'v');
-vMeal18= MealBox(transl(1.3, -1.1, 0.02), 'v');
-vMeal19= MealBox(transl(1.3, -1.3, 0.02), 'v');
-vMeal20= MealBox(transl(1.3, -1.5, 0.02), 'v');
-vMeal21= MealBox(transl(1.3, -1.7, 0.02), 'v');
-vMeal22= MealBox(transl(1.3, -1.9, 0.02), 'v');
-vMeal23= MealBox(transl(1.3, -2.1, 0.02), 'v');
-vMeal24= MealBox(transl(1.3, -2.3, 0.02), 'v');
-vMeal25= MealBox(transl(1.3, -2.5, 0.02), 'v');
-vMeal26= MealBox(transl(1.3, -2.7, 0.02), 'v');
-vMeal27= MealBox(transl(1.3, -2.9, 0.02), 'v');
-vMeal28= MealBox(transl(1.3, -3.1, 0.02), 'v');
-vMeal29= MealBox(transl(1.3, -3.3, 0.02), 'v');
-
-% Insert Meat Meal
-mMeal1= MealBox(transl(1.6, 2.3, 0.02), 'm');
-mMeal2= MealBox(transl(1.6, 2.1, 0.02), 'm');
-mMeal3= MealBox(transl(1.6, 1.9, 0.02), 'm');
-mMeal4= MealBox(transl(1.6, 1.7, 0.02), 'm');
-mMeal5= MealBox(transl(1.6, 1.5, 0.02), 'm');
-mMeal6= MealBox(transl(1.6, 1.3, 0.02), 'm');
-mMeal7= MealBox(transl(1.6, 1.1, 0.02), 'm');
-mMeal8= MealBox(transl(1.6, 0.9, 0.02), 'm');
-mMeal9= MealBox(transl(1.6, 0.7, 0.02), 'm');
-mMeal10= MealBox(transl(1.6, 0.5, 0.02), 'm');
-mMeal11= MealBox(transl(1.6, 0.3, 0.02), 'm');
-mMeal12= MealBox(transl(1.6, 0.1, 0.02), 'm');
-mMeal13= MealBox(transl(1.6, -0.1, 0.02), 'm');
-mMeal14= MealBox(transl(1.6, -0.3, 0.02), 'm');
-mMeal15= MealBox(transl(1.6, -0.5, 0.02), 'm');
-mMeal16= MealBox(transl(1.6, -0.7, 0.02), 'm');
-mMeal17= MealBox(transl(1.6, -0.9, 0.02), 'm');
-mMeal18= MealBox(transl(1.6, -1.1, 0.02), 'm');
-mMeal19= MealBox(transl(1.6, -1.3, 0.02), 'm');
-mMeal20= MealBox(transl(1.6, -1.5, 0.02), 'm');
-mMeal21= MealBox(transl(1.6, -1.7, 0.02), 'm');
-mMeal22= MealBox(transl(1.6, -1.9, 0.02), 'm');
-mMeal23= MealBox(transl(1.6, -2.1, 0.02), 'm');
-mMeal24= MealBox(transl(1.6, -2.3, 0.02), 'm');
-mMeal25= MealBox(transl(1.6, -2.5, 0.02), 'm');
-mMeal26= MealBox(transl(1.6, -2.7, 0.02), 'm');
-mMeal27= MealBox(transl(1.6, -2.9, 0.02), 'm');
-mMeal28= MealBox(transl(1.6, -3.1, 0.02), 'm');
-mMeal29= MealBox(transl(1.6, -3.3, 0.02), 'm');
-
-% OffloadBay
-%package1 = FullStockTray(transl(-4.6,4,-0.3));
-%package2 = FullStockTray(transl(-3.6,4,-0.3));
-%package3 = FullStockTray(transl(-2.6,4,-0.3));
-%package4 = FullStockTray(transl(-1.6,4,-0.3));
-
-% Meal Prep Zone
-
-%% Idea
-% Make a list of objects to be pushed vs not
-% Cell
-% Pass the cell into conveyor belt class
-% 

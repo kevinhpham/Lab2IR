@@ -1,5 +1,6 @@
 %% This class will be used to set-up the environment
 % It is derived from the TestEnvironment '.m' file.
+% This script populates the environment as shown in the video.
 
 %% Setting the Environment
 % Clear the figures & set up the conditions for the environment
@@ -9,7 +10,7 @@ axis equal;
 hold on 
 
 % Set the axis and view to isometric
-axis([0, 5, -5, 5, -0.88, 3])
+axis([-5, 5, -5, 5, -0.88, 3])
 view(3)
 
 % Import the floor/ wallpapers
@@ -19,13 +20,13 @@ surf([-5,-5;5,5] ...
       ,'CData',imread('Floor.jpg') ...
       ,'FaceColor','texturemap');
 
-surf([5,5;5,5] ...
+surf([-5,5;-5,5] ...
       ,[5,5;5,5] ...
       ,[3,3;-0.88,-0.88] ...
       ,'CData',imread('WallPaperWords.jpg') ...
       ,'FaceColor','texturemap');
 
-surf([-5,-5;-5,-5] ...
+surf([5,5;5,5] ...
       ,[5,-5;5,-5] ...
       ,[3,3;-0.88,-0.88] ...
       ,'CData',imread('WallPaper.jpg') ...
@@ -41,7 +42,7 @@ juiceConveyorCenter.move((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
 juiceConveyorRight = ConveyorD(transl(0,0,0));
 juiceConveyorRight.move((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
 dobotTable = RobotTable(transl(-1.65,-3.6,0));
-%dobot = DobotMagician(dobotTable.base*transl(0,0,0));
+dobot = DobotMagician(dobotTable.base*transl(0,0,0));
 
 % E05 Setup
 mealConveyorLeft = ConveyorD(transl(0,0,0));
@@ -100,8 +101,8 @@ safetyTable4 = MealRobotTable(transl(4,0.5,0));
 fireExtinguisher4 = FireExtinguisher(transl(4,0.5,0));
 
 % First Aid
-firstAidJuice = FirstAidKit(transl(5,3.5,0));
-firstAidMeal = FirstAidKit(transl(-5,3.5,0));
+firstAidMeal = FirstAidKit(transl(5,3.5,0));
+firstAidJuice = FirstAidKit(transl(-5,3.5,0));
 
 % Package Boxes
 packageBoxJ1 = StockBox(transl(-4.75,4,-0.88));

@@ -13,7 +13,7 @@ classdef E05_worker <handle
             if nargin < 1			
 			    basetr = eye(4);				
             end
-            %Sets up Linear UR3
+            %Sets up a E05_L
             hold on
             self.robot = E05_L(basetr);
             self.robot.model.offset = [0 pi/2 -pi/3 0 0 0];
@@ -32,7 +32,6 @@ classdef E05_worker <handle
            self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
            self.gripper.plot([0 0 0]);
            self.gripper.setDelay(0)
-
            self.collidables = {};
         end
 
@@ -64,7 +63,6 @@ classdef E05_worker <handle
         volume = (max(pointCloud(:,1))-min(pointCloud(:,1))*(max(pointCloud(:,2))-min(pointCloud(:,2))))*(max(pointCloud(:,3))-min(pointCloud(:,3)));
         disp(['Aproximated volume of workspace given current joint limits is ', num2str(volume),'m^3']);
         end
-        
 
         function [qPath] = planMidDepositPath(self,placement,q0,steps)
             %Plans a path to reset the arm  joint position
@@ -113,22 +111,18 @@ classdef E05_worker <handle
 
         end
 
-        function [qPath] = planDepositPath(self,item,placement,q0,steps)
+        function [qPath] = planDepositPath(self,item,placement,steps)
             %Plans the path from picking up item and placing it down on.
             %Does not include retraction.
             %"placement" is the object to place 'item' on, e.g if placing
             %down a tray on conveyorbelt, "placement" = conveyorbelt, 'item' = tray.
             disp(['E05_Worker: Looking for deposit path for ', item.plyFile]);
-            if nargin < 5
+            if nargin < 4
                 steps = 60;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
-                if nargin < 4
-                    msg = 'q0 is not given.Path planners will use current joint position as q0. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path.';
-                    warning(msg);
-                    q0 = self.robot.model.getpos();
-               end
             end
-            qPath1 = self.planRetract(q0,1.5,steps); %Lift up whatever item is grasped
+            q0 = self.robot.model.getpos();
+            qPath1 = self.planRetract(q0,1,steps); %Lift up whatever item is grasped
             q0 = qPath1(length(qPath1()),:);
             qPath2 = self.planMidDepositPath(placement,q0,steps);
             q0 = qPath2(length(qPath2()),:);
@@ -137,20 +131,17 @@ classdef E05_worker <handle
         end
 
 
-        function [qPath] = planPickupPath(self,item,q0,steps)
+        function [qPath] = planPickupPath(self,item,steps)
             %Returns a joint path the robot can take to pick up an item.
             disp(['E05_Worker: Planning pick up path for', item.plyFile]);
-            if nargin < 4
+            if nargin < 3
                 steps = 60;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
-                if nargin < 3
-                    msg = 'q0 is not given.Path planners will use current joint position as q0. q0 is the starting position of the robot arm and is used for inverse kinematic calculations. q0 helps path planners to find the most optimal joint path.';
-                    warning(msg);
-                    q0 = self.robot.model.getpos();
-               end
             end
-                %Add midway path
+                %Add midway paths
+                q0 = self.robot.model.getpos();
                 qPath1 = self.planMidPickPath(item,q0,steps);
+                 %Add aapproach path
                 q0 = qPath1(length(qPath1),:);
                 disp(['E05_Worker: Looking for 2nd midwaypoint to pick up ', item.plyFile]);
                 qPath2 = self.searchPickup(item,q0,0.3,steps); %Finds midpoint position
@@ -175,7 +166,7 @@ classdef E05_worker <handle
                 %check for collisions
                 itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
                 itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
-                size(self.collidables)
+                size(self.collidables);
 
                 if 0 < size(self.collidables)
                     check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
@@ -229,9 +220,9 @@ classdef E05_worker <handle
                 steps = 30;
                 disp(['E05_Worker: Planning for default number of steps: ',num2str(steps)])
                 if nargin < 3
-                    distance = 0.3;
+                    distance = 0.5;
                     disp(['E05_Worker: Distance value is set to default: ',num2str(distance), "m"])
-                    if nargin < 2
+                    if nargin <2
                         msg = 'q0 is not given. q0 is the starting position of the robot arm and is used for inverse kinematic calculations.  q0 helps path planners to find the most optimal joint path';
                         warning(msg);
                     end
@@ -277,6 +268,10 @@ classdef E05_worker <handle
             if isobject(items)  %if items in array
                 self.collidables = horzcat(self.collidables,(num2cell(items)));
             end
+        end 
+
+        function [q] = GetPos(self);
+            q = self.robot.model.getpos();
         end
     end
     
