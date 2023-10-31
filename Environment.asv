@@ -24,8 +24,6 @@ classdef Environment <handle
         bJuiceStock;
         cutleryStock;
         oJuiceStock;
-        vMealStock;
-        mMealStock;
     end
     
     methods
@@ -37,31 +35,6 @@ classdef Environment <handle
 
          
         function SetupStaticEnvironment(self)
-
-            camlight;
-            hold on;
-
-            axis([-5, 5, -5, 5, -0.88, 3])
-            view(3)
-
-            surf([-5,-5;5,5] ...
-                  ,[-5,5;-5,5] ...
-                  ,[-0.88,-0.88;-0.88,-0.88] ...
-                  ,'CData',imread('Floor.jpg') ...
-                  ,'FaceColor','texturemap');
-
-            surf([-5,5;-5,5] ...
-                  ,[5,5;5,5] ...
-                  ,[3,3;-0.88,-0.88] ...
-                  ,'CData',imread('WallPaperWords.jpg') ...
-                  ,'FaceColor','texturemap');
-
-            surf([5,5;5,5] ...
-                  ,[5,-5;5,-5] ...
-                  ,[3,3;-0.88,-0.88] ...
-                  ,'CData',imread('WallPaper.jpg') ...
-                  ,'FaceColor','texturemap');
-
             % The purpose of this function is to setup the static environment
             % Empty tray storage in the environment (x2)
             self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
@@ -94,7 +67,7 @@ classdef Environment <handle
             % Safety Equipment Tables
             self.safetyTable(1) = MealRobotTable(transl(-3,0.5,0));
             self.safetyTable(2) = MealRobotTable(transl(-4,0.5,0));
-            self.safetyTable(3) = MealRobotTable(transl(3,0.5,0));
+            self.safetyTable(3) = MealRobotTable(transl(3,0.5,0);
             self.safetyTable(4) = MealRobotTable(transl(4,0.5,0));
 
             % Estop
@@ -106,7 +79,7 @@ classdef Environment <handle
             self.fireExtinguisher(2) = FireExtinguisher(transl(4,0.5,0));
 
             % First Aid
-            self.firstAid(1) = FirstAidKit(transl(-5,3.5,0)); % First Aid Juice Section
+            self.firstAid(1) = FirstAidKit(transl(5,3.5,0)); % First Aid  Section
             self.firstAid(2) = FirstAidKit(transl(5,3.5,0)); % First Aid Meal Section
 
             % Offload Bay Display Stock
@@ -172,23 +145,6 @@ classdef Environment <handle
             self.vMealStock(13) = MealBox(transl(1.6,4.3,0.02), 'v');
             self.vMealStock(14) = MealBox(transl(1.8,4.3,0.02), 'v');
             self.vMealStock(15) = MealBox(transl(2.0,4.3,0.02), 'v');
-
-            % Meat Meal Stock
-            self.mMealStock(1) = MealBox(transl(2.4,4.7,0.02), 'm');
-            self.mMealStock(2) = MealBox(transl(2.6,4.7,0.02), 'm');
-            self.mMealStock(3) = MealBox(transl(2.8,4.7,0.02), 'm');
-            self.mMealStock(4) = MealBox(transl(3.0,4.7,0.02), 'm');
-            self.mMealStock(5) = MealBox(transl(3.2,4.7,0.02), 'm');
-            self.mMealStock(6) = MealBox(transl(2.4,4.5,0.02), 'm');
-            self.mMealStock(7) = MealBox(transl(2.6,4.5,0.02), 'm');
-            self.mMealStock(8) = MealBox(transl(2.8,4.5,0.02), 'm');
-            self.mMealStock(9) = MealBox(transl(3.0,4.5,0.02), 'm');
-            self.mMealStock(10) = MealBox(transl(3.2,4.5,0.02), 'm');
-            self.mMealStock(11) = MealBox(transl(2.4,4.3,0.02), 'm');
-            self.mMealStock(12) = MealBox(transl(2.6,4.3,0.02), 'm');
-            self.mMealStock(13) = MealBox(transl(2.8,4.3,0.02), 'm');
-            self.mMealStock(14) = MealBox(transl(3.0,4.3,0.02), 'm');
-            self.mMealStock(15) = MealBox(transl(3.2,4.3,0.02), 'm');
 
         end 
 

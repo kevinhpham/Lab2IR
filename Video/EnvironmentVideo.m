@@ -1,5 +1,6 @@
 %% This class will be used to set-up the environment
 % It is derived from the TestEnvironment '.m' file.
+% This script populates the environment as shown in the video.
 
 %% Setting the Environment
 % Clear the figures & set up the conditions for the environment
