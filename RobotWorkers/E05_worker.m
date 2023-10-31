@@ -1,6 +1,5 @@
 classdef E05_worker <handle
-   %%This Class is currently under construction
-   %Creates a E05 robot that moves trays and meals onto the conveyer
+   % This Class Creates a E05 robot that moves trays and meals onto the conveyer
     properties
        robot; 
        gripper; 
@@ -15,7 +14,7 @@ classdef E05_worker <handle
             end
             %Sets up a E05_L
             hold on
-            self.robot = E05_L(basetr);
+            self.robot = E05_L(basetr); %
             self.robot.model.offset = [0 pi/2 -pi/3 0 0 0];
             self.robot.model.plot(zeros(6))
             self.robot.model.delay = 0;

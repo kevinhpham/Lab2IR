@@ -18,7 +18,7 @@ classdef Environment <handle
         bJuiceStock;
         cutleryStock;
         oJuiceStock;
-        vMealStock;
+        vMealStock; 
         mMealStock;
         trayConveyor;
         bJuiceConveyor;
@@ -67,10 +67,12 @@ classdef Environment <handle
                   ,'FaceColor','texturemap');
 
             % Empty tray storage in the environment (x2)
+            self.trayStorage = TrayStorage.empty; % Matlab thinks its an array of doubles
             self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
             self.trayStorage(2) = TrayStorage((transl(3.85,-1.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 2
 
             % GlassBarriers in the environment
+            self.glassBarrier = GlassBarrier.empty;
             self.glassBarrier(1) = GlassBarrier(transl(-4,-1,-0.9));
             self.glassBarrier(2) = GlassBarrier(transl(-3.15,-1,-0.9));
             self.glassBarrier(3) = GlassBarrier(transl(4,-1,-0.9));
@@ -85,35 +87,42 @@ classdef Environment <handle
             self.glassBarrier(12) = GlassBarrier((transl(3.7,-2.0,-0.9))*(rpy2tr(0,0,pi/2)));
 
             % Back Offload Bay
+            self.offloadBay = OffloadBay.empty;
             self.offloadBay(1) = OffloadBay(transl(0.9,4,-0.88)); % Meal Offload Bay
             self.offloadBay(2) = OffloadBay(transl(-10.9,4,-0.88)); % Juice Offload Bay
 
             % Package Boxes underneath the offload bay
+            self.packageBox = StockBox.empty;
             self.packageBox(1) = StockBox(transl(-4.75,4,-0.88)); % Juice Offload Box
             self.packageBox(2) = StockBox(transl(-2.75,4,-0.88)); % Juice Offload Box
             self.packageBox(3) = StockBox(transl(1.1,4,-0.88)); % Meal Offload Box
             self.packageBox(4) = StockBox(transl(3.1,4,-0.88)); % Meal Offload Box
 
             % Safety Equipment Tables
+            self.safetyTable = MealRobotTable.empty;
             self.safetyTable(1) = MealRobotTable(transl(-3,0.5,0));
             self.safetyTable(2) = MealRobotTable(transl(-4,0.5,0));
             self.safetyTable(3) = MealRobotTable(transl(3,0.5,0));
             self.safetyTable(4) = MealRobotTable(transl(4,0.5,0));
 
             % Estop
+            self.eStop = Estop.empty;
             self.eStop = Estop(transl(-3,0.5,0.2));
             self.eStop = Estop(transl(3,0.5,0.2));
 
             % Fire Extinguisher
+            self.fireExtinguisher = FireExtinguisher.empty;
             self.fireExtinguisher(1) = FireExtinguisher(transl(-4,0.5,0));
             self.fireExtinguisher(2) = FireExtinguisher(transl(4,0.5,0));
 
             % First Aid
+            self.firstAid = FirstAidKit.empty;
             self.firstAid(1) = FirstAidKit(transl(-5,3.5,0)); % First Aid Juice Section
             self.firstAid(2) = FirstAidKit(transl(5,3.5,0)); % First Aid Meal Section
 
             % Offload Bay Display Stock
             % Blackcurrent Juice Stock
+            self.bJuiceStock = JuiceBox.empty;
             self.bJuiceStock(1) = JuiceBox(transl(-3.6,4.7,0.02), 'b');
             self.bJuiceStock(2) = JuiceBox  (transl(-3.8,4.7,0.02), 'b');
             self.bJuiceStock(3) = JuiceBox(transl(-4.0,4.7,0.02), 'b');
@@ -131,6 +140,7 @@ classdef Environment <handle
             self.bJuiceStock(15) = JuiceBox(transl(-3.6,4.3,0.02), 'b');
 
             % Cutlery Stock
+            self.cutleryStock = Cutlery.empty;
             self.cutleryStock(1) = Cutlery(transl(-3.2, 4.7, 0.02));
             self.cutleryStock(2) = Cutlery(transl(-3.0, 4.7, 0.02));
             self.cutleryStock(3) = Cutlery(transl(-2.8, 4.7, 0.02));
@@ -143,6 +153,7 @@ classdef Environment <handle
             self.cutleryStock(10) = Cutlery(transl(-2.4, 4.4, 0.02));
 
             % Orange Juice Stock
+            self.oJuiceStock = JuiceBox.empty;
             self.oJuiceStock(1) = JuiceBox(transl(-2.0,4.7,0.02), 'o');
             self.oJuiceStock(2) = JuiceBox(transl(-1.8,4.7,0.02), 'o');
             self.oJuiceStock(3) = JuiceBox(transl(-1.6,4.7,0.02), 'o');
@@ -160,6 +171,7 @@ classdef Environment <handle
             self.oJuiceStock(15) = JuiceBox(transl(-1.2,4.3,0.02), 'o');
 
             % Veg Meal Stock
+            self.vMealStock = MealBox.empty;
             self.vMealStock(1) = MealBox(transl(1.2,4.7,0.02), 'v');
             self.vMealStock(2) = MealBox(transl(1.4,4.7,0.02), 'v');
             self.vMealStock(3) = MealBox(transl(1.6,4.7,0.02), 'v');
@@ -177,6 +189,7 @@ classdef Environment <handle
             self.vMealStock(15) = MealBox(transl(2.0,4.3,0.02), 'v');
 
             % Meat Meal Stock
+            self.mMealStock = MealBox.empty;
             self.mMealStock(1) = MealBox(transl(2.4,4.7,0.02), 'm');
             self.mMealStock(2) = MealBox(transl(2.6,4.7,0.02), 'm');
             self.mMealStock(3) = MealBox(transl(2.8,4.7,0.02), 'm');
@@ -192,7 +205,6 @@ classdef Environment <handle
             self.mMealStock(13) = MealBox(transl(2.8,4.3,0.02), 'm');
             self.mMealStock(14) = MealBox(transl(3.0,4.3,0.02), 'm');
             self.mMealStock(15) = MealBox(transl(3.2,4.3,0.02), 'm');
-
         end 
 
         function SetupNonStaticEnvironment(self) % The purpose of this function is to setup the non-static (movable) items in the environment
@@ -203,15 +215,18 @@ classdef Environment <handle
             view(3)
 
             % Main tray storage for robot to access to create trays
+            self.trayStorage = TrayStorage.empty;
             self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
             self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
             self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
                                                    % Allows tray items to be pushed
 
             % Main conveyor for food
+            self.trayConveyor = Conveyor2.empty;
             self.trayConveyor = Conveyor2(transl(0,-4,0)); 
 
             % Delivery Conveyors
+            self.bJuiceConveyor = ConveyorD.empty;
             self.bJuiceConveyor = ConveyorD((transl(-2,-0.8,0))*(rpy2tr(0,0,pi/2)));
             self.cutleryConveyor = ConveyorD((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
             self.oJuiceConveyor = ConveyorD((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
@@ -219,6 +234,7 @@ classdef Environment <handle
             self.mMealConveyor = ConveyorD((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
 
             % Chef People
+            self.chefPerson = ChefPerson.empty;
             self.chefPerson(1) = ChefPerson(transl(-2.3,2.5,-0.2));
             self.chefPerson(2) = ChefPerson(transl(-1.6,2.9,-0.2));
             self.chefPerson(3) = ChefPerson(transl(-1,2.5,-0.2));
