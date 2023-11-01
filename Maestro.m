@@ -1,8 +1,8 @@
-classdef Maestro <Environment & handle
+classdef Maestro <Environment
     %MAESTRO will be in charge of organising all the robots, environment
     %and conveyerbelts to work altogether
 
-    properties      % This sets up t he constant properties of the workspace (static/non-static)
+    properties      % This sets up the constant properties of the workspace (static/non-static)
                     % Comment out the nonStatic Environment as needed.
 
         % staticEnvironment = StaticEnvironment();
@@ -19,7 +19,7 @@ classdef Maestro <Environment & handle
 
         function TestFunction(self)
             self.trayStorage;
-            self.chefPerson(1);
+            self.chefPerson(1).move((transl(0,2.0,-0.9))*(rpy2tr(0,0,pi/2)));
 
             %self.chefPerson(1).setPushDistance(0.028*30/steps);
             %This creates an error as it's not a method in the
