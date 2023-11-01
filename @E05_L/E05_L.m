@@ -4,6 +4,7 @@
 classdef E05_L <handle
  properties(Access = public)  % Set to public so can be accessed by other classes.     
         model;
+        base;  % Add by Emma so that gui app can access
     end
 
  methods

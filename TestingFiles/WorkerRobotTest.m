@@ -7,6 +7,9 @@ MakeMeal(steps)
 
 end
 function MakeMeal(steps)
+    %sets up estop gui
+    pendant = TestEstop();
+
     %Sets up environment for e05
      mealConveyor(1) = ConveyorD(transl(1.3,-0.4,0)*rpy2tr(0,0,-pi/2));
      mealConveyor(2) = ConveyorD(transl(1.6,-0.4,0)*rpy2tr(0,0,-pi/2));
@@ -38,128 +41,131 @@ function MakeMeal(steps)
                                                      
     %worker.plotWorkspace();
     axis equal
-    for i = 1:length(trays)
-            k= i-1; %item index that dobot will use, since dobot starts after first loop
-            %Create joint planning path to pickup tray
-            if mod(i,2) == 0    %alternate between types each iteration
-                meals{i} = MealBox(mealConveyor(1).base,'m');    %creates orange juice boxes
-            else
-               meals{i} = MealBox(mealConveyor(2).base,'v');     %create black current
-            end          
-
-            %start feeding dobot stock after first loop
-            if mod(i,2) == 0    %alternate between juice types each iteration
-                juiceBoxes{i} = JuiceBox(dobotConveyor(1).base,'o');    %creates orange juice boxes
-            else
-                juiceBoxes{i} = JuiceBox(dobotConveyor(3).base*rpy2tr(0,0,pi),'b');    %create black current
-            end
-            cutlery{i} = Cutlery(dobotConveyor(2).base);             %creates cutlery
+    while(1)
+        for i = 1:length(trays)
+                k= i-1; %item index that dobot will use, since dobot starts after first loop
+                %Create joint planning path to pickup tray
+                if mod(i,2) == 0    %alternate between types each iteration
+                    meals{i} = MealBox(mealConveyor(1).base,'m');    %creates orange juice boxes
+                else
+                   meals{i} = MealBox(mealConveyor(2).base,'v');     %create black current
+                end          
+    
+                %start feeding dobot stock after first loop
+                if mod(i,2) == 0    %alternate between juice types each iteration
+                    juiceBoxes{i} = JuiceBox(dobotConveyor(1).base,'o');    %creates orange juice boxes
+                else
+                    juiceBoxes{i} = JuiceBox(dobotConveyor(3).base*rpy2tr(0,0,pi),'b');    %create black current
+                end
+                cutlery{i} = Cutlery(dobotConveyor(2).base);             %creates cutlery
+                
+                pushables{end+1} = meals{i};                             %add items to pusable so they can get pushed by main conveyor
+                pushables{end+1} = juiceBoxes{i};
+                pushables{end+1} = cutlery{i};
+    
+            %E05 Move to pickup trays + push meal stock down + Dobot move to
+            %cutlery
+            %MAKE SURE DOBOT AND E05 PATH PLAN USES THE SAME STEPS
+                e05qPath = worker.planPickupPath(trays{i},steps);
+ 
+                if i > 1    %check if first iteration has been made
+                        dobotqPath = dobot.planPickupPath(cutlery{k},steps);      %plan path for dobot to pickup cutlery
+                end
+    
+                for step = 1:length(e05qPath)
+                    %animate worker moving to tray
+                    worker.animateArm(e05qPath(step,:));
+                    %animate dobot moving to cutlery
+                    if i > 1
+                        dobot.animateArm(dobotqPath(step,:));   %animate dobot arm
+                    end
+                    % push stock down conveyor
+                    mealConveyor(1).push(meals)
+                    mealConveyor(2).push(meals)
+                    pause(0)
+                end
+    
+                %Plans Deposit path for tray and cutlery
+                e05qPath = worker.planDepositPath(trays{i},trayConveyor,steps);  %Plan path to move tray to the conveyor belt
+                if i > 1
+                    dobotqPath = dobot.planDepositPath(cutlery{k},trays{k},steps); %plan path for move cutlery to tray
+                end
+    
+                 for step = 1:length(e05qPath)
+                        worker.animateArm(e05qPath(step,:),trays{i});        
+                    if i > 1
+                        dobot.animateArm(dobotqPath(step,:),cutlery{k});
+                    end
+                     pause(0)
+                 end
             
-            pushables{end+1} = meals{i};                             %add items to pusable so they can get pushed by main conveyor
-            pushables{end+1} = juiceBoxes{i};
-            pushables{end+1} = cutlery{i};
-
-        %E05 Move to pickup trays + push meal stock down + Dobot move to
-        %cutlery
-        %MAKE SURE DOBOT AND E05 PATH PLAN USES THE SAME STEPS
-            e05qPath = worker.planPickupPath(trays{i},steps);
-            if i > 1    %check if first iteration has been made
-                    dobotqPath = dobot.planPickupPath(cutlery{k},steps);      %plan path for dobot to pickup cutlery
-            end
-
-            for step = 1:length(e05qPath)
-                %animate worker moving to tray
-                worker.animateArm(e05qPath(step,:));
-                %animate dobot moving to cutlery
-                if i > 1
-                    dobot.animateArm(dobotqPath(step,:));   %animate dobot arm
-                end
-                % push stock down conveyor
-                mealConveyor(1).push(meals)
-                mealConveyor(2).push(meals)
-                pause(0)
-            end
-
-            %Plans Deposit path for tray and cutlery
-            e05qPath = worker.planDepositPath(trays{i},trayConveyor,steps);  %Plan path to move tray to the conveyor belt
-            if i > 1
-                dobotqPath = dobot.planDepositPath(cutlery{k},trays{k},steps); %plan path for move cutlery to tray
-            end
-
+             % Retract e05 arm from tray and dobot from cutlery
+             e05q0 = worker.GetPos();
+             e05qPath = worker.planRetract(e05q0,1,steps);
+             if i > 1
+                dobotq0 = dobot.GetPos();
+                dobotqPath = dobot.planRetract(dobotq0,0.1,steps);
+             end
+    
              for step = 1:length(e05qPath)
-                    worker.animateArm(e05qPath(step,:),trays{i});        
-                if i > 1
-                    dobot.animateArm(dobotqPath(step,:),cutlery{k});
-                end
+                 if i > 1
+                    dobot.animateArm(dobotqPath(step,:));
+                 end
+                 worker.animateArm(e05qPath(step,:));
                  pause(0)
              end
-        
-         % Retract e05 arm from tray and dobot from cutlery
-         e05q0 = worker.GetPos();
-         e05qPath = worker.planRetract(e05q0,1,steps);
-         if i > 1
-            dobotq0 = dobot.GetPos();
-            dobotqPath = dobot.planRetract(dobotq0,0.1,steps);
-         end
-
-         for step = 1:length(e05qPath)
-             if i > 1
-                dobot.animateArm(dobotqPath(step,:));
+            
+            % %Create pickup path planning path for mealbox and juicebox
+             e05qPath = worker.planPickupPath(meals{i},steps);
+              if i > 1
+                dobotqPath = dobot.planPickupPath(juiceBoxes{k},steps);      %plan path for dobot to pickup juicebox
+              end
+    
+             for step = 1:length(e05qPath)
+                 worker.animateArm(e05qPath(step,:));
+                 if i > 1
+                    dobot.animateArm(dobotqPath(step,:));            %animate dobot arm
+                 end
+                 pause(0.0)
              end
-             worker.animateArm(e05qPath(step,:));
-             pause(0)
-         end
-        
-        % %Create pickup path planning path for mealbox and juicebox
-         e05qPath = worker.planPickupPath(meals{i},steps);
-          if i > 1
-            dobotqPath = dobot.planPickupPath(juiceBoxes{k},steps);      %plan path for dobot to pickup juicebox
-          end
-
-         for step = 1:length(e05qPath)
-             worker.animateArm(e05qPath(step,:));
-             if i > 1
-                dobot.animateArm(dobotqPath(step,:));            %animate dobot arm
+            
+            %Plans Deposit path for meal and juicebox
+            e05qPath = worker.planDepositPath(meals{i},trays{i},steps);  %Plan path to move tray to the Conveyor belt
+            if i > 1
+                dobotqPath = dobot.planDepositPath(juiceBoxes{k},trays{k},steps);   %plan path for dobot to pickup juicebox
+            end
+    
+             for step = 1:length(e05qPath)
+                 if i > 1
+                    dobot.animateArm(dobotqPath(step,:),juiceBoxes{k});           
+                 end
+                 worker.animateArm(e05qPath(step,:),meals{i});              %Animate arm moving with tray
+                 pause(0)
              end
-             pause(0.0)
-         end
-        
-        %Plans Deposit path for meal and juicebox
-        e05qPath = worker.planDepositPath(meals{i},trays{i},steps);  %Plan path to move tray to the Conveyor belt
-        if i > 1
-            dobotqPath = dobot.planDepositPath(juiceBoxes{k},trays{k},steps);   %plan path for dobot to pickup juicebox
-        end
-
-         for step = 1:length(e05qPath)
+            
+             %Retracts grippers from items
+             e05q0 =  worker.GetPos();
+             e05qPath = worker.planRetract(e05q0,1,steps);
              if i > 1
-                dobot.animateArm(dobotqPath(step,:),juiceBoxes{k});           
+                dobotq0 =  dobot.GetPos();
+                dobotqPath = dobot.planRetract(dobotq0,0.1,steps);      %plan path for dobot to pickup juicebox
+              end
+             for step = 1:length(e05qPath)
+                 if i > 1
+                    dobot.animateArm(dobotqPath(step,:));           
+                 end
+                 worker.animateArm(e05qPath(step,:));
+                 pause(0)
              end
-             worker.animateArm(e05qPath(step,:),meals{i});              %Animate arm moving with tray
-             pause(0)
-         end
-        
-         %Retracts grippers from items
-         e05q0 =  worker.GetPos();
-         e05qPath = worker.planRetract(e05q0,1,steps);
-         if i > 1
-            dobotq0 =  dobot.GetPos();
-            dobotqPath = dobot.planRetract(dobotq0,0.1,steps);      %plan path for dobot to pickup juicebox
-          end
-         for step = 1:length(e05qPath)
-             if i > 1
-                dobot.animateArm(dobotqPath(step,:));           
-             end
-             worker.animateArm(e05qPath(step,:));
-             pause(0)
-         end
-        
-        %Pushes items on conveyor belt
-         for step = 1:3*steps
-             trayConveyor.push(pushables)
-             dobotConveyor(1).push(juiceBoxes)
-             dobotConveyor(2).push(cutlery)
-             dobotConveyor(3).push(juiceBoxes)
-             pause(0.01)
+            
+            %Pushes items on conveyor belt
+             for step = 1:3*steps
+                 trayConveyor.push(pushables)
+                 dobotConveyor(1).push(juiceBoxes)
+                 dobotConveyor(2).push(cutlery)
+                 dobotConveyor(3).push(juiceBoxes)
+                 pause(0.01)
+            end
         end
     end
 end
