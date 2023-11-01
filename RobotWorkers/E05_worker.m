@@ -4,6 +4,7 @@ classdef E05_worker <handle
        robot; 
        gripper; 
        collidables; %items to perform collision checking on
+       power;       %on by default.
     end
 
     methods
@@ -32,6 +33,9 @@ classdef E05_worker <handle
            self.gripper.plot([0 0 0]);
            self.gripper.setDelay(0)
            self.collidables = {};
+           
+           %turn on robot
+           self.power = 1;
         end
 
         %%Plots the workspace of the arm as a pointcloud and finds approximate volume
@@ -160,39 +164,43 @@ classdef E05_worker <handle
                  item = uint8.empty;
              end
             collision = 0;
-
-            if not(isempty(item)) %if there is an item
-                %check for collisions
-                itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
-                itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
-                size(self.collidables);
-
-                if 0 < size(self.collidables)
-                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
-                    check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));          %check if gripper will collide once arm moves
-                    check(3) = CollisionDetection.itemsIsCollision(item,self.collidables,itemToGlobal);           %check if item will collide
-                    collision = any(check);                                %collision will return true if anything is colliding
+            if self.power == 1  %if robot is turned on
+                if not(isempty(item)) %if there is an item
+                    %check for collisions
+                    itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
+                    itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
+                    size(self.collidables);
+    
+                    if 0 < size(self.collidables)
+                        check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
+                        check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));          %check if gripper will collide once arm moves
+                        check(3) = CollisionDetection.itemsIsCollision(item,self.collidables,itemToGlobal);           %check if item will collide
+                        collision = any(check);                                %collision will return true if anything is colliding
+                    end
+                    
+                    if collision == 0                                          %If there is no collision, proceed to move
+                        self.robot.model.animate(qq);                          %Move robot to new joint position
+                        self.gripper.setBase(self.robot.model.fkineUTS(qq));   %Set new gripper base
+                        self.gripper.animate(self.gripper.getPos());           %Move gripper to new base
+                        item.move(itemToGlobal);                               %Move item to new location
+                    end
+    
+                else    %if there is no item
+                    if 0 < size(self.collidables)
+                        check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide
+                        check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));            %check if gripper will collide once arm moves
+                        collision = any(check);                                                             %return true if there is a collision
+                    end
+    
+                    if collision == 0  %No collision, move arm
+                        self.robot.model.animate(qq);
+                        self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
+                        self.gripper.animate(self.gripper.getPos());
+                    end
                 end
-                
-                if collision == 0                                          %If there is no collision, proceed to move
-                    self.robot.model.animate(qq);                          %Move robot to new joint position
-                    self.gripper.setBase(self.robot.model.fkineUTS(qq));   %Set new gripper base
-                    self.gripper.animate(self.gripper.getPos());           %Move gripper to new base
-                    item.move(itemToGlobal);                               %Move item to new location
-                end
-
-            else    %if there is no item
-                if 0 < size(self.collidables)
-                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide
-                    check(2) = self.gripper.isCollision(self.collidables,self.robot.model.fkineUTS(qq));            %check if gripper will collide once arm moves
-                    collision = any(check);                                                             %return true if there is a collision
-                end
-
-                if collision == 0  %No collision, move arm
-                    self.robot.model.animate(qq);
-                    self.gripper.setBase(self.robot.model.fkineUTS(self.robot.model.getpos()));
-                    self.gripper.animate(self.gripper.getPos());
-                end
+            else
+                msg = 'E05 arm was not animated. E05_Worker is not turned on.';
+                disp(msg)
             end
         end
 
@@ -201,13 +209,18 @@ classdef E05_worker <handle
             %To animate path smoothely, enter in scalesteps 1 by 1 with loop
             %scale = 0 = opened
             %scale = 1 = closed
-            if or(1 < scale, scale < 0)
-                msg = "An invalid gripper scale has been chosen. Choose a scale between 0 and 1";
-                error(msg);
+            if self.power == 1  %if robot is turned on
+                if or(1 < scale, scale < 0)
+                    msg = "An invalid gripper scale has been chosen. Choose a scale between 0 and 1";
+                    error(msg);
+                end
+                qlims = self.gripper.getQlim();
+                q = [0 qlims(2,2) qlims(3,1)]*scale;
+                self.gripper.animate(q);
+            else
+                msg = 'E05 gripper was not animated. E05_Worker is not turned on.';
+                disp(msg)
             end
-            qlims = self.gripper.getQlim();
-            q = [0 qlims(2,2) qlims(3,1)]*scale;
-            self.gripper.animate(q);
         end
 
         function [jointPath] = planRetract(self,q0,distance,steps)
@@ -269,8 +282,15 @@ classdef E05_worker <handle
             end
         end 
 
-        function [q] = GetPos(self);
+        function [q] = GetPos(self)
             q = self.robot.model.getpos();
+        end
+        function TurnOn(self)
+            self.power = 1;
+        end
+
+        function TurnOff(self)
+            self.power = 0;
         end
     end
     
