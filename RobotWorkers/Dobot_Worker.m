@@ -6,6 +6,7 @@ classdef Dobot_Worker <handle
        robot; 
        gripperHeight;
        collidables; %items to perform collision checking on
+       power;          %on by default
     end
 
     methods
@@ -25,8 +26,9 @@ classdef Dobot_Worker <handle
                               deg2rad([-5 85]);
                               deg2rad([0 180]);
                               deg2rad([-85 85]);]; %set up joint limits for arm
-            self.gripperHeight = 0.05;              %Gripper is built in DobotMagician model, so gripper height will be specified here.
+            self.gripperHeight = 0.05;             %Gripper is built in DobotMagician model, so gripper height will be specified here.
             self.collidables = {};
+            self.power = 1;                        %Turn on Dobot
         end
 
         %%Plots the workspace of the arm as a pointcloud and finds approximate volume
@@ -153,37 +155,42 @@ classdef Dobot_Worker <handle
             %if any part of the arm or item will collides with items in
             %"collidables"
             %To animate path smoothely, enter in jointsteps 1 by 1 with loop
-             if nargin < 3
-                 item = uint8.empty;
-             end
-            collision = 0;
-
-            if not(isempty(item)) %if there is an item
-                %check for collisions
-                itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
-                itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
-                size(self.collidables);
-
-                if 0 < size(self.collidables)
-                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
-                    check(2) = CollisionDetection.itemsIsCollision(item,self.collidables,itemToGlobal);           %check if item will collide
-                    collision = any(check);                                %collision will return true if anything is colliding
+            if self.power == 1  %check if dobot is on
+                 if nargin < 3
+                     item = uint8.empty;
+                 end
+                collision = 0;
+    
+                if not(isempty(item)) %if there is an item
+                    %check for collisions
+                    itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
+                    itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
+                    size(self.collidables);
+    
+                    if 0 < size(self.collidables)
+                        check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
+                        check(2) = CollisionDetection.itemsIsCollision(item,self.collidables,itemToGlobal);           %check if item will collide
+                        collision = any(check);                                %collision will return true if anything is colliding
+                    end
+                    
+                    if collision == 0                                          %If there is no collision, proceed to move
+                        self.robot.model.animate(qq);                          %Move robot to new joint position
+                        item.move(itemToGlobal);                               %Move item to new location
+                    end
+    
+                else    %if there is no item
+                    if 0 < size(self.collidables)
+                        check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide 
+                        collision = any(check);                                                             %return true if there is a collision
+                    end
+    
+                    if collision == 0  %No collision, move arm
+                        self.robot.model.animate(qq);
+                    end
                 end
-                
-                if collision == 0                                          %If there is no collision, proceed to move
-                    self.robot.model.animate(qq);                          %Move robot to new joint position
-                    item.move(itemToGlobal);                               %Move item to new location
-                end
-
-            else    %if there is no item
-                if 0 < size(self.collidables)
-                    check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide 
-                    collision = any(check);                                                             %return true if there is a collision
-                end
-
-                if collision == 0  %No collision, move arm
-                    self.robot.model.animate(qq);
-                end
+            else
+                msg = 'Dobot_Worker arm was not moved. Dobot_Worker is not turned on.';
+                disp(msg)
             end
         end
 
@@ -217,8 +224,15 @@ classdef Dobot_Worker <handle
                 self.collidables = horzcat(self.collidables,(num2cell(items)));
             end
         end
-        function [q] = GetPos(self);
+        function [q] = GetPos(self)
             q = self.robot.model.getpos();
+        end
+        function TurnOn(self)
+            self.power = 1;
+        end
+
+        function TurnOff(self)
+            self.power = 0;
         end
     end
     
