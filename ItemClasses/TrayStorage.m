@@ -14,14 +14,14 @@ classdef TrayStorage < Item
         
         %Fills rack with 'count' amount of trays
         %Returns an array containing the trays
-        function [TrayArray] = addTrays(self,count)
-            if (0<=count & count<=8)
+        function [trayArray] = AddTrays(self,count)
+            if (0<=count && count<=8)
                 base = self.base;
                 spacing = 0.06;
-                TrayArray = Tray.empty;
+                trayArray = Tray.empty;
                     for i = 1:count
-                        traytr = transl(0.06*i-0.265,0,0.15)*rpy2tr(0,90,0,'deg');
-                        TrayArray(i) = Tray(base*traytr);
+                        traytr = transl(spacing*i-0.265,0,0.15)*rpy2tr(0,90,0,'deg');
+                        trayArray(i) = Tray(base*traytr);
                     end
             else
                 msg = 'Invalid number of trays. Must be between 0 and 8 trays.';
