@@ -61,7 +61,7 @@ classdef Dobot_Worker <handle
 
         % Returns: qPath
         % Input: self, placement, q0, steps
-        function [qPath] = planMidDepositPath(self,placement,q0,steps)
+        function [qPath] = PlanMidDepositPath(self,placement,q0,steps)
             %Plans a path to to reach the approach position for
             %dpeositing. "placement" is the tray that the dobot will
             %deposit items on
@@ -85,7 +85,7 @@ classdef Dobot_Worker <handle
 
         % Returns: qPath
         % Input: self, item, q0, steps
-        function [qPath] = planMidPickPath(self,item,q0,steps)
+        function [qPath] = PlanMidPickPath(self,item,q0,steps)
             %Plans a path to reach a midpoint to pick up "item". this
             %midpoint is a hard coded joint configuration
              disp(['Dobot_Worker: Looking for mid path to pickup ', item.plyFile]);
@@ -116,7 +116,7 @@ classdef Dobot_Worker <handle
 
         % Returns: qPath
         % Input: self, item, placement, steps
-        function [qPath] = planDepositPath(self,item,placement,steps)
+        function [qPath] = PlanDepositPath(self,item,placement,steps)
             %Plans the path from picking up item and placing it down on.
             %Does not include retraction.
             %"placement" is the object to place 'item' on, e.g if placing
@@ -127,9 +127,9 @@ classdef Dobot_Worker <handle
                 disp(['Dobot_Worker: Planning for default number of steps: ',num2str(steps)])
             end
             q0 = self.robot.model.getpos();
-            qPath1 = self.planRetract(q0,0.2,steps); %Lift up whatever item is grasped
+            qPath1 = self.PlanRetract(q0,0.2,steps); %Lift up whatever item is grasped
             q0 = qPath1(length(qPath1()),:);
-            qPath2 = self.planMidDepositPath(placement,q0,steps);
+            qPath2 = self.PlanMidDepositPath(placement,q0,steps);
             q0 = qPath2(length(qPath2()),:);
             qPath3 = self.searchDeposit(item,placement,q0,0,steps);    
             qPath = [qPath1;qPath2;qPath3];
@@ -137,7 +137,7 @@ classdef Dobot_Worker <handle
 
         %Return: qPath
         %Input: self, item, steps
-        function [qPath] = planPickupPath(self,item,steps)
+        function [qPath] = PlanPickupPath(self,item,steps)
             %Returns a joint path the robot can take to pick up an item.
             disp(['Dobot_Worker: Planning pick up path for ', item.plyFile]);
             if nargin < 3
@@ -146,7 +146,7 @@ classdef Dobot_Worker <handle
             end
                 %Add midway path
                 q0 = self.robot.model.getpos();
-                qPath1 = self.planMidPickPath(item,q0,steps);
+                qPath1 = self.PlanMidPickPath(item,q0,steps);
                 q0 = qPath1(length(qPath1),:);
                 disp(['Dobot_Worker: Looking for 2nd midwaypoint to pick up ', item.plyFile]);
                 qPath2 = self.searchPickup(item,q0,0.05,steps); %Finds midpoint position
@@ -159,7 +159,7 @@ classdef Dobot_Worker <handle
 
         % Return: collision
         % Input: self, qq, item
-        function [collision] = animateArm(self,qq,item)
+        function [collision] = AnimateArm(self,qq,item)
             %animate arm and item to move together. returns true
             %if any part of the arm or item will collides with items in
             %"collidables"
@@ -174,7 +174,6 @@ classdef Dobot_Worker <handle
                     %check for collisions
                     itemToEnd = inv(self.robot.model.fkineUTS(self.robot.model.getpos()))*item.base;    %Find item's tf relative to end effector's frame
                     itemToGlobal = self.robot.model.fkineUTS(qq)*itemToEnd;                             %Find item's new global tf base on endeffectors movement
-                    size(self.collidables);
     
                     if 0 < size(self.collidables)
                         check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);         %check if arm will collide
@@ -189,7 +188,7 @@ classdef Dobot_Worker <handle
     
                 else    %if there is no item
                     if 0 < size(self.collidables)
-                        check(1) = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide 
+                        check = CollisionDetection.robotIsCollision(self.robot.model,qq,self.collidables);           %check if arm will collide 
                         collision = any(check);                                                             %return true if there is a collision
                     end
     
@@ -205,7 +204,7 @@ classdef Dobot_Worker <handle
 
         % Return: jointPath
         % Input: self, q0, distance, steps
-        function [jointPath] = planRetract(self,q0,distance,steps)
+        function [jointPath] = PlanRetract(self,q0,distance,steps)
             %Returns path to retract end effector by "distance" meters
             disp('E05_Worker: Planning path to retract end effector')
             if nargin < 4
@@ -228,7 +227,7 @@ classdef Dobot_Worker <handle
 
         % Return: nothing
         % Input: self, items
-        function addCollidables(self,items)
+        function AddCollidables(self,items)
             if iscell(items)    %if items are in a cell
                 self.collidables = horzcat(self.collidables,items);
             end
