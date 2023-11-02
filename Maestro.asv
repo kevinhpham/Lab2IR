@@ -53,75 +53,19 @@ classdef Maestro <Environment %Inherits from Environment
                     end 
                 end 
             elseif self.procedure == 2
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 3
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 4
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 5
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 6
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 7
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 8
-                for i = 10
-                    if i == 0
-                        % do stuff
-                    elseif i == 1
-                        % do stuff
-                    else 
-                        break
-                    end 
-                end 
+                % Do this
             elseif self.procedure == 9
                 for i = 10
                     if i == 0
