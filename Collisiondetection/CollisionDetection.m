@@ -44,36 +44,42 @@ classdef CollisionDetection <handle
         end
         
         %% itemIsCollision
-        %checks if two item objects are/will collide with each other.
+        %checks if item1 will collide with items in "item2" are/will collide with each other.
         %If a transform(tr) is entered, the function will check if there
         %would be a collisions if item1 was moved to that transform.
-        % Returns 1 if collision is found, otherwise return 0
+        % Returns 1 if a collision is found, otherwise return 0
         function result = itemsIsCollision(item1,item2,tr)
             if nargin < 3
                 tr = item1.base;
             end
-            corners1 = ([item1.corners,ones(size(item1.corners,1),1)]); %convert corners into homogenous vectors
-            corners2 = ([item2.corners,ones(size(item2.corners,1),1)]);
-            for i =1:length(corners1(:,1))
-                corners1(i,:) = corners1(i,:)*tr.';                     %converts corners to same frame
-                corners2(i,:) = corners2(i,:)*item2.base.';             
+            if not(iscell(item2))                   %If items in "item2" is not in a cell
+                item2 = num2cell(item2);             %convert item2 into cell
             end
-            
-            %checks if corners are between eachother. If they are, that
-            %means the items are intersecting eachother
-            if and(corners1(1,1:3) <= corners2(2,1:3), corners2(1,1:3) <= corners1(1,1:3)) %if item1 lower corner is between item2 corners
-                result = true;
-            elseif and(corners1(2,1:3) <= corners2(2,1:3), corners2(1,1:3) <= corners1(2,1:3)) %if item1 upper corner is between item2 corners
-                result = true;
-            elseif and(corners2(1,1:3) <= corners1(2,1:3), corners1(1,1:3) <= corners2(1,1:3)) %if item2 lower corner is between item1 corners
-                result = true;
-            elseif and(corners2(2,1:3) <= corners1(2,1:3), corners1(1,1:3) <= corners2(2,1:3)) %if item2 upper corner is between item1 corners    
-                result = true;
-            else
-                result = false;
-            end
-            if result == true
-                display(['CollisionDetection has detected upcoming collision between ',item1.plyFile,' and ', item2.plyFile]);
+
+            for j = 1:length(item2)
+                corners1 = ([item1.corners,ones(size(item1.corners,1),1)]); %convert corners into homogenous vectors
+                corners2 = ([item2{j}.corners,ones(size(item2{j}.corners,1),1)]);
+                for i =1:length(corners1(:,1))
+                    corners1(i,:) = corners1(i,:)*tr.';                     %converts corners to global frame
+                    corners2(i,:) = corners2(i,:)*item2{j}.base.';             
+                end
+                %checks if corners are between eachother. If true, that
+                %means the items are intersecting eachother
+                if and(corners1(1,1:3) <= corners2(2,1:3), corners2(1,1:3) <= corners1(1,1:3)) %if item1 lower corner is between item2 corners
+                    result = true;
+                elseif and(corners1(2,1:3) <= corners2(2,1:3), corners2(1,1:3) <= corners1(2,1:3)) %if item1 upper corner is between item2 corners
+                    result = true;
+                elseif and(corners2(1,1:3) <= corners1(2,1:3), corners1(1,1:3) <= corners2(1,1:3)) %if item2 lower corner is between item1 corners
+                    result = true;
+                elseif and(corners2(2,1:3) <= corners1(2,1:3), corners1(1,1:3) <= corners2(2,1:3)) %if item2 upper corner is between item1 corners    
+                    result = true;
+                else
+                    result = false;
+                end
+                if result == true
+                    display(['CollisionDetection has detected upcoming collision between ',item1.plyFile,' and ', item2{j}.plyFile]);
+                return
+                end
             end
         end
 
