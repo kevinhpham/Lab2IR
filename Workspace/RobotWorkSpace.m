@@ -1,4 +1,6 @@
-classdef Environment <handle
+classdef RobotWorkSpace <handle
+    %Copy of Environment, just name change cause matlab kept reading wrong
+    %files of same name
     % The purpose of this class is to make the environment
     % The class differentiates between a static and non-static environment
     % This is achieved through two functions:
@@ -35,7 +37,7 @@ classdef Environment <handle
     end
     
     methods
-        function self = Environment() % Defining functions
+        function self = RobotWorkSpace() % Defining functions
             self.SetupStaticEnvironment(); % Populates workspace with static items
             self.SetupNonStaticEnvironment(); % Populates workspace with non-static items
         end
@@ -215,10 +217,11 @@ classdef Environment <handle
             view(3)
 
             % Main tray storage for robot to access to create trays
+            self.pushables = {};
             self.trayStorage = TrayStorage.empty;
             self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
-            self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
-            self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
+            %self.trays = self.trayStorage.AddTrays(8); % Creates and array of trays
+            %self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
                                                    % Allows tray items to be pushed
 
             % Main conveyor for food
@@ -227,11 +230,11 @@ classdef Environment <handle
 
             % Delivery Conveyors
             self.bJuiceConveyor = ConveyorD.empty;
-            self.bJuiceConveyor = ConveyorD((transl(-2,-0.8,0))*(rpy2tr(0,0,pi/2)));
-            self.cutleryConveyor = ConveyorD((transl(-1.65,-0.4,0))*(rpy2tr(0,0,pi/2)));
-            self.oJuiceConveyor = ConveyorD((transl(-1.3,-0.8,0))*(rpy2tr(0,0,pi/2)));
-            self.vMealConveyor = ConveyorD((transl(1.3,-0.4,0))*(rpy2tr(0,0,pi/2)));
-            self.mMealConveyor = ConveyorD((transl(1.6,-0.4,0))*(rpy2tr(0,0,pi/2)));
+            self.oJuiceConveyor = ConveyorD(transl(-1.9,-0.8,-0.05)*rpy2tr(0,0,-pi/2));
+            self.cutleryConveyor = ConveyorD(transl(-1.65,-0.6,-0.05)*rpy2tr(0,0,-pi/2));
+            self.bJuiceConveyor = ConveyorD(transl(-1.4,-0.8,-0.05)*rpy2tr(0,0,-pi/2));
+            self.vMealConveyor = ConveyorD((transl(1.3,-0.4,0))*(rpy2tr(0,0,-pi/2)));
+            self.mMealConveyor = ConveyorD((transl(1.6,-0.4,0))*(rpy2tr(0,0,-pi/2)));
 
             % Chef People
             self.chefPerson = ChefPerson.empty;
@@ -240,16 +243,17 @@ classdef Environment <handle
             self.chefPerson(3) = ChefPerson(transl(-1,2.5,-0.2));
             self.chefPerson(4) = ChefPerson(transl(1.1, 2.8,-0.2));
             self.chefPerson(5) = ChefPerson(transl(1.8, 2.8,-0.2));
-            self.pushables = horzcat(self.pushables, num2cell(self.chefPerson)); % Adds chefPerson to pushables cell array
+            %self.pushables = horzcat(self.pushables, num2cell(self.chefPerson)); % Adds chefPerson to pushables cell array
                                                                                  % Allows both trays and chefPeople to be 
                                                                                  % pushed at the same time.
+                                                                                 %Disabled due to long computation times
 
             % Robots + Tables
-            self.dobotTable = RobotTable(transl(-1.65,-3.6,0)); % Table for Dobot
-            self.dobot = DobotMagician(self.dobotTable.base*transl(0,0,0));
+            self.dobotTable = RobotTable(transl(-1.65,-3.7,-0.1)); % Table for Dobot
+            self.dobot = Dobot_Worker(self.dobotTable.base*transl(0,0,0.1));
 
             self.e05Table = MealRobotTable(transl(1.45,-3.6,0)); % Table for e05
-            self.e05Robot = E05_worker(self.e05Table.base*transl(0,0,0));
+            self.e05Robot = E05_worker(self.e05Table.base*transl(0,0,self.e05Table.corners(2,3))*rpy2tr(0,0,pi/2));
 
         end
     end
