@@ -4,7 +4,7 @@
 classdef RG6_Gripper <handle
 
  % 'left' and 'right' represent fingers
- properties(Access = private)
+ properties(Access = public)
         left;
         right;
         height; % Current height of gripper
@@ -37,26 +37,26 @@ classdef RG6_Gripper <handle
         self.right = SerialLink(links, 'name', 'Gripper_RIGHT');
      end
 
-     function setBase(self,baseTr) 
+     function SetBase(self,baseTr) 
         self.left.base = baseTr;
         self.right.base = baseTr*rpy2tr(0,0,pi);
      end
 
-     function [base] = getBase(self) 
+     function [base] = GetBase(self) 
          base = self.left.base.T;
      end
 
     % Function: Animate gripper
-    function animate(self,q)
+    function Animate(self,q)
         hold on
         self.left.animate(q)
         self.right.animate(q)
-        self.updateHeight();
+        self.UpdateHeight();
     end
 
     % Function: Plots both fingers of the gripper
-    % This supports the getPos function: retrieving joint positions.
-    function plot(self,q)
+    % This supports the GetPos function: retrieving joint positions.
+    function Plot(self,q)
         hold on
         self.left.plot(q)
         self.right.plot(q)
@@ -64,42 +64,42 @@ classdef RG6_Gripper <handle
 
     % Function: Adds a delay defined by 't' to support simultaneous motion
     % of the gripper fingers (left, right)
-    function setDelay(self,t)
+    function SetDelay(self,t)
         self.left.delay = t;
         self.right.delay = t;
     end
 
     % Function: Returns the height of the gripper. 
-    function [height]= getHeight(self)
+    function [height]= GetHeight(self)
         height= self.height;
     end
 
     % Function: Returns joint positions of fingers
     % Assumes symmetrical behaviour: left = right
-    function [q] = getPos(self)
+    function [q] = GetPos(self)
         q = self.left.getpos();
     end
 
     % Function: Returns the joint limits of fingers 
     % Assumes symmetrical behaviour: left = right 
-    function [qLims] = getQlim(self)
+    function [qLims] = GetQlim(self)
         qLims = self.left.qlim();
     end
     
     %check if gripper fingers will collide with an item object
     function [result] = isCollision(self,item,tr,qMatrix)
         if nargin<4
-            qMatrix = self.getPos;      %default: use current pose
+            qMatrix = self.GetPos;      %default: use current pose
             if nargin<3
-                tr = self.getBase;      %default: use current base
+                tr = self.GetBase;      %default: use current base
             end
         end
-        currentBase = self.getBase;     %Save current gripper base
-        self.setBase(tr);                %temporarily set gripper base to planned location
+        currentBase = self.GetBase;     %Save current gripper base
+        self.SetBase(tr);                %temporarily set gripper base to planned location
         check(1) = CollisionDetection.robotIsCollision(self.left,qMatrix,item); %check if gripper fingers are in collision
         check(2) = CollisionDetection.robotIsCollision(self.right,qMatrix,item);
         result = any(check);            %if any gripper finger is in collision, return true
-        self.setBase(currentBase);     %Reset gripper base back to normal
+        self.SetBase(currentBase);     %Reset gripper base back to normal
         if result == true
             disp(['CollisionDetection has detected upcoming collision with RG6 Gripper',])
         end
@@ -108,9 +108,9 @@ classdef RG6_Gripper <handle
  end
 
  methods(Hidden)
-     function updateHeight(self)
+     function UpdateHeight(self)
          % Updates height parameter, requires robot to be plotted
-         tr = inv(self.left.base.T)*self.left.fkineUTS(self.getPos());% Transform of finger tip in gripper base frame
+         tr = inv(self.left.base.T)*self.left.fkineUTS(self.GetPos());% Transform of finger tip in gripper base frame
          self.height = tr(3,4);
      end
  end
