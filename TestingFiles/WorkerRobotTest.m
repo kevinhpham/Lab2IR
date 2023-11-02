@@ -8,7 +8,7 @@ MakeMeal(steps)
 end
 function MakeMeal(steps)
     %sets up estop gui
-    pendant = TestEstop();
+    %pendant = TestEstop();
 
     %Sets up environment for e05
      mealConveyor(1) = ConveyorD(transl(1.3,-0.4,0)*rpy2tr(0,0,-pi/2));

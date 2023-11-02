@@ -9,13 +9,13 @@ classdef Dobot_Worker <handle
        power;          %on by default
     end
 
-    methods
-        %%setups worker
+    methods 
+        %%setups worker       
         function self = Dobot_Worker(basetr)
             if nargin < 1			
 			    basetr = eye(4);				
             end
-            %Sets up Linear UR3
+            %Sets up DobotMagician
             hold on
             self.robot = DobotMagician(basetr);
             % self.robot.model.offset = [0 pi/2 -pi/3 0 0 ];
@@ -59,6 +59,8 @@ classdef Dobot_Worker <handle
         disp(['Aproximated volume of workspace given current joint limits is ', num2str(volume),'m^3']);
         end
 
+        % Returns: qPath
+        % Input: self, placement, q0, steps
         function [qPath] = planMidDepositPath(self,placement,q0,steps)
             %Plans a path to to reach the approach position for
             %dpeositing. "placement" is the tray that the dobot will
@@ -81,6 +83,8 @@ classdef Dobot_Worker <handle
             end
         end
 
+        % Returns: qPath
+        % Input: self, item, q0, steps
         function [qPath] = planMidPickPath(self,item,q0,steps)
             %Plans a path to reach a midpoint to pick up "item". this
             %midpoint is a hard coded joint configuration
@@ -110,6 +114,8 @@ classdef Dobot_Worker <handle
 
         end
 
+        % Returns: qPath
+        % Input: self, item, placement, steps
         function [qPath] = planDepositPath(self,item,placement,steps)
             %Plans the path from picking up item and placing it down on.
             %Does not include retraction.
@@ -129,7 +135,8 @@ classdef Dobot_Worker <handle
             qPath = [qPath1;qPath2;qPath3];
         end
 
-
+        %Return: qPath
+        %Input: self, item, steps
         function [qPath] = planPickupPath(self,item,steps)
             %Returns a joint path the robot can take to pick up an item.
             disp(['Dobot_Worker: Planning pick up path for ', item.plyFile]);
@@ -150,6 +157,8 @@ classdef Dobot_Worker <handle
                 qPath = [qPath1;qPath2;qPath3];
         end
 
+        % Return: collision
+        % Input: self, qq, item
         function [collision] = animateArm(self,qq,item)
             %animate arm and item to move together. returns true
             %if any part of the arm or item will collides with items in
@@ -194,6 +203,8 @@ classdef Dobot_Worker <handle
             end
         end
 
+        % Return: jointPath
+        % Input: self, q0, distance, steps
         function [jointPath] = planRetract(self,q0,distance,steps)
             %Returns path to retract end effector by "distance" meters
             disp('E05_Worker: Planning path to retract end effector')
@@ -215,6 +226,8 @@ classdef Dobot_Worker <handle
             jointPath= jtraj(q0,targetJoints,steps);                   %quintic polynomial trajectory 
         end
 
+        % Return: nothing
+        % Input: self, items
         function addCollidables(self,items)
             if iscell(items)    %if items are in a cell
                 self.collidables = horzcat(self.collidables,items);
