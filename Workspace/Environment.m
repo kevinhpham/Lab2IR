@@ -217,7 +217,7 @@ classdef Environment <handle
             % Main tray storage for robot to access to create trays
             self.trayStorage = TrayStorage.empty;
             self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
-            self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
+            self.trays = self.trayStorage.AddTrays(8); % Creates and array of trays
             self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
                                                    % Allows tray items to be pushed
 
