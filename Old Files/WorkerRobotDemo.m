@@ -24,7 +24,7 @@ function MakeMeal(steps)
      trayStorage = TrayStorage(transl(1.95,-3.6,0)*rpy2tr(0,0,pi/2));
      trayConveyor = Conveyor2(transl(0,-4,0)*rpy2tr(0,0,0));
      worker = E05_worker(e05Table.base*transl(0,0,e05Table.corners(2,3))*rpy2tr(0,0,pi/2)); %create E05 worker
-     worker.animateGripper(1);                               %Close the gripper
+     worker.AnimateGripper(1);                               %Close the gripper
     
      %set up for dobot
     dobotConveyor(1) = ConveyorD(transl(-1.9,-0.8,-0.05)*rpy2tr(0,0,-pi/2));    %left conveyor
@@ -42,7 +42,7 @@ function MakeMeal(steps)
      trayConveyor.setPushDistance(-0.029*30/steps) 
     
      %Setup movable items
-     trays = num2cell(trayStorage.addTrays(8));
+     trays = num2cell(trayStorage.AddTrays(8));
      pushables = {};
      pushables = horzcat(pushables,trays); %Fill rack up with trays
                                                      
