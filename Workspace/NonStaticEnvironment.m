@@ -17,6 +17,7 @@ classdef NonStaticEnvironment <handle
         dobotTable;
         e05Table;
         pushables;
+        lightCurtain;
     end
     
     methods
@@ -34,7 +35,7 @@ classdef NonStaticEnvironment <handle
             % Main tray storage for robot to access to create trays
             self.trayStorage = TrayStorage.empty;
             self.trayStorage = TrayStorage((transl(1.95, -3.6, 0))*(rpy2tr(0,0,pi/2))); % Defines the position of the tray storage
-            self.trays = self.trayStorage.addTrays(8); % Creates and array of trays
+            self.trays = self.trayStorage.AddTrays(8); % Creates and array of trays
             self.pushables = num2cell(self.trays); % Adds to a cell array called pushables
                                                    % Allows tray items to be pushed
 
@@ -60,6 +61,11 @@ classdef NonStaticEnvironment <handle
             self.pushables = horzcat(self.pushables, num2cell(self.chefPerson)); % Adds chefPerson to pushables cell array
                                                                                  % Allows both trays and chefPeople to be 
                                                                                  % pushed at the same time.
+            
+            % LightCurtain in the Environment
+            self.lightCurtain = LightCurtain.empty;
+            self.lightCurtain(1) = LightCurtain(transl(4.35,-1,-0.85));
+            % self.pushables = horzcat(self.pushables, num2cell(self.LightCurtain));
 
             % Robots + Tables
             self.dobotTable = RobotTable(transl(-1.65,-3.6,0)); % Table for Dobot
