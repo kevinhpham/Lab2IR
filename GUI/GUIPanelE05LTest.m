@@ -21,6 +21,7 @@ while(1)
     
     % % read joystick
     wrench = pendant.read
+    
     % -------------------------------------------------------------
     % YOUR CODE GOES HERE
     % % 1 - turn joystick input into an end-effector force measurement command
@@ -44,6 +45,9 @@ while(1)
     % 3 - apply joint velocity to step robot joint angles 
     % -------------------------------------------------------------
         q = robot.model.getpos + qdot.'*dt
+
+        qpos = double(rad2deg(robot.model.getpos()));
+        pendant.setJointAngles(qpos)
     % Update plot
     robot.model.animate(q);  
     
