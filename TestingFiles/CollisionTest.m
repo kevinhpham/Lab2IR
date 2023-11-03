@@ -4,6 +4,7 @@ clc
 
 q = zeros(1,6);
 worker = E05_worker;
+worker.TurnOn
 axis equal
 steps = 60;
 %setting up robot arm path
@@ -14,7 +15,7 @@ qpath = jtraj(q0,qf,60);
 %setting up chefs
 chef = ChefPerson(transl(0,-0.9,0));
 chef2 = ChefPerson(transl(2,-0.9,0)*rpy2tr(0,0,-pi/2));
-worker.addCollidables([chef chef2]);
+worker.AddCollidables([chef chef2]);
 
 %setting up environment
 % Import the floor/ wallpapers
@@ -38,11 +39,9 @@ surf([3,3;3,3] ...
 
 e05Table = MealRobotTable(transl(0,0,-0.2));
 
-pause(30)
-
 %Moving arm with collision checking
 for i = 1: steps
-    result(i) = worker.animateArm(qpath(i,:));
+    result(i) = worker.AnimateArm(qpath(i,:));
     if(result(i)==1)
         disp('Robot Worker is about to collide, stopping arm.')
         break
@@ -58,7 +57,7 @@ end
          break
      end
      chef2.move(move)
-     pause(0.0)
+     pause(0.1)
  end
 
 %setting up  newrobot arm path
@@ -68,7 +67,7 @@ qpath = jtraj(q0,qf,60);
 
 %Moving arm with collision checking
 for i = 1: steps
-    result(i) = worker.animateArm(qpath(i,:));
+    result(i) = worker.AnimateArm(qpath(i,:));
     if(result(i)==1)
         disp('Robot Worker is about to collide, stopping arm.')
         break
