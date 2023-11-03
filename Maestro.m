@@ -69,21 +69,31 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         end
 
         function MealOrders(self,mealType,juiceType,amount)
-            self.Reset()
-            self.trays = self.trayStorage.AddTrays(amount);
-            self.mealType = mealType;
-            self.juiceType = juiceType;
-            self.totalMealCount = amount+1;
-            self.ContinueOrder;
+            if (self.eButton == 1 || self.lightSensor == 1 || self.controlPause == 1 || self.e05Robot.power == 0 || self.dobot.power== 0)
+                msg = "Meal Order was not sent as system is currently stopped.";
+                warning(msg)
+            else
+                self.Reset()
+                self.trays = self.trayStorage.AddTrays(amount);
+                self.mealType = mealType;
+                self.juiceType = juiceType;
+                self.totalMealCount = amount+1;
+                self.ContinueOrder;
+            end
         end
 
         function ContinueOrder(self)
-            while (self.eButton == 0 && self.lightSensor == 0 && self.controlPause == 0)
-                self.PlanProcedure()
-                self.ExecuteProcedure()
-                if self.totalMealCount < self.currentMealCount
-                    break
+            if  self.currentMealCount <= self.totalMealCount
+                while (self.eButton == 0 && self.lightSensor == 0 && self.controlPause == 0)
+                    self.PlanProcedure()
+                    self.ExecuteProcedure()
+                    if (self.totalMealCount < self.currentMealCount) || (self.eButton == 1 || self.lightSensor == 1 || self.controlPause == 1)
+                        break
+                    end
                 end
+            else
+                msg = "Order could not be continued as all current orders have been completed.";
+                warning(msg)
             end
         end
 
