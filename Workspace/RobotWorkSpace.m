@@ -71,7 +71,6 @@ classdef RobotWorkSpace <handle
 
             % Empty tray storage in the environment (x2)
             self.trayStorage = TrayStorage.empty; % Matlab thinks its an array of doubles
-            % self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
             self.trayStorage(1) = TrayStorage(transl(3.0,-1.3,0)); % Empty Rack 1
             self.trayStorage(2) = TrayStorage(transl(2.3,-1.3,0)); % Empty Rack 2
 
@@ -107,8 +106,8 @@ classdef RobotWorkSpace <handle
 
             % Estop
             self.eStop = Estop.empty;
-            self.eStop = Estop(transl(-3,0.5,0.2));
-            self.eStop = Estop(transl(3,0.5,0.2));
+            self.eStop = Estop(transl(-3,0.5,0.1));
+            self.eStop = Estop(transl(3,0.5,0.1));
 
             % Fire Extinguisher
             self.fireExtinguisher = FireExtinguisher.empty;
