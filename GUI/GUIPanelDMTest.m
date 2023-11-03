@@ -6,10 +6,10 @@ close
 pendant = GUIPanelDM;
 
 %% Set up robot
-DobotMagician;                           % Load E05_L
-robot = DobotMagician;                 %% Create copy called 'robot
+Stick_Dobot;                         % Load Dobot Magician
+robot = Stick_Dobot;                 % Create copy called 'robot
 %% Start "real-time" simulation
-q = robot.defaultRealQ;              % Set initial robot configuration 'q'
+q = [0,pi/4,pi/4,0,0];              % Set initial robot configuration 'q'
 
 HF = figure(1);                         % Initialise figure to display robot
 robot.model.plot(q);                    % Plot robot in initial configuration
