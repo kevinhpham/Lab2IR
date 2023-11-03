@@ -50,7 +50,7 @@ classdef UserDemo
          juiceResult = ['Juice: ', juiceChoice];
          disp(mealResult)
          disp(juiceResult)
-         disp('cutlery')
+         disp('Cutlery')
 
          disp(' ')
          input("Press enter to send order to kitchen", "s"); % Mimic user interface

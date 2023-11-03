@@ -34,6 +34,7 @@ classdef RobotWorkSpace <handle
         dobotTable;
         e05Table;
         pushables;
+        lightCurtain;
     end
     
     methods
@@ -70,23 +71,20 @@ classdef RobotWorkSpace <handle
 
             % Empty tray storage in the environment (x2)
             self.trayStorage = TrayStorage.empty; % Matlab thinks its an array of doubles
-            self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
-            self.trayStorage(2) = TrayStorage((transl(3.85,-1.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 2
+            % self.trayStorage(1) = TrayStorage((transl(3.85,-2.6,0))*(rpy2tr(0,0,pi/2))); % Empty Rack 1
+            self.trayStorage(1) = TrayStorage(transl(3.0,-1.3,0)); % Empty Rack 1
+            self.trayStorage(2) = TrayStorage(transl(2.3,-1.3,0)); % Empty Rack 2
 
             % GlassBarriers in the environment
             self.glassBarrier = GlassBarrier.empty;
             self.glassBarrier(1) = GlassBarrier(transl(-4,-1,-0.9));
             self.glassBarrier(2) = GlassBarrier(transl(-3.15,-1,-0.9));
-            self.glassBarrier(3) = GlassBarrier(transl(4,-1,-0.9));
-            self.glassBarrier(4) = GlassBarrier(transl(2.75,-1,-0.9));
-            self.glassBarrier(5) = GlassBarrier(transl(-0.15,-1,-0.9));
-            self.glassBarrier(6) = GlassBarrier(transl(0.15,-1,-0.9));
-            self.glassBarrier(7) = GlassBarrier((transl(0,0,-0.9))*(rpy2tr(0,0,pi/2)));
-            self.glassBarrier(8) = GlassBarrier((transl(0,2.0,-0.9))*(rpy2tr(0,0,pi/2)));
-            self.glassBarrier(9) = GlassBarrier((transl(0,4.0,-0.9))*(rpy2tr(0,0,pi/2)));
-            self.glassBarrier(10) = GlassBarrier(transl(2.75,-3.2,-0.9));
-            self.glassBarrier(11) = GlassBarrier((transl(3.7,-2.25,-0.9))*(rpy2tr(0,0,pi/2)));
-            self.glassBarrier(12) = GlassBarrier((transl(3.7,-2.0,-0.9))*(rpy2tr(0,0,pi/2)));
+            self.glassBarrier(3) = GlassBarrier(transl(2.75,-1,-0.9));
+            self.glassBarrier(4) = GlassBarrier(transl(-0.15,-1,-0.9));
+            self.glassBarrier(5) = GlassBarrier(transl(0.15,-1,-0.9));
+            self.glassBarrier(6) = GlassBarrier((transl(0,0,-0.9))*(rpy2tr(0,0,pi/2)));
+            self.glassBarrier(7) = GlassBarrier((transl(0,2.0,-0.9))*(rpy2tr(0,0,pi/2)));
+            self.glassBarrier(8) = GlassBarrier((transl(0,4.0,-0.9))*(rpy2tr(0,0,pi/2)));
 
             % Back Offload Bay
             self.offloadBay = OffloadBay.empty;
@@ -105,7 +103,7 @@ classdef RobotWorkSpace <handle
             self.safetyTable(1) = MealRobotTable(transl(-3,0.5,0));
             self.safetyTable(2) = MealRobotTable(transl(-4,0.5,0));
             self.safetyTable(3) = MealRobotTable(transl(3,0.5,0));
-            self.safetyTable(4) = MealRobotTable(transl(4,0.5,0));
+            self.safetyTable(4) = MealRobotTable(transl(3,1.2,0));
 
             % Estop
             self.eStop = Estop.empty;
@@ -115,7 +113,7 @@ classdef RobotWorkSpace <handle
             % Fire Extinguisher
             self.fireExtinguisher = FireExtinguisher.empty;
             self.fireExtinguisher(1) = FireExtinguisher(transl(-4,0.5,0));
-            self.fireExtinguisher(2) = FireExtinguisher(transl(4,0.5,0));
+            self.fireExtinguisher(2) = FireExtinguisher(transl(3,1.2,0));
 
             % First Aid
             self.firstAid = FirstAidKit.empty;
@@ -247,6 +245,10 @@ classdef RobotWorkSpace <handle
                                                                                  % Allows both trays and chefPeople to be 
                                                                                  % pushed at the same time.
                                                                                  %Disabled due to long computation times
+            % LightCurtain in the Environment
+            self.lightCurtain = LightCurtain.empty;
+            self.lightCurtain(1) = LightCurtain(transl(4.35,-1,-0.85));
+            % self.pushables = horzcat(self.pushables, num2cell(self.LightCurtain));
 
             % Robots + Tables
             self.dobotTable = RobotTable(transl(-1.65,-3.7,-0.1)); % Table for Dobot
