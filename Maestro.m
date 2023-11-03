@@ -22,7 +22,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         e05PlannedPath; % Where the robot wants to go
         e05ItemHold;    % What item the robot is holding
         e05Placement;   % What item the robot will place grasped item on
-        steps = 10;     % Number of steps animations take
+        steps = 30;     % Number of steps animations take
 
         % conveyor trackinf variables
         conveyorCurrentPushCount; %how many times the conveyor has pushed during a procedure
@@ -74,7 +74,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
                 warning(msg)
             else
                 self.Reset()
-                self.trays = self.trayStorage.AddTrays(amount);
+                self.trays = self.trayStorage.AddTrays(8);
                 self.mealType = mealType;
                 self.juiceType = juiceType;
                 self.totalMealCount = amount+1;
@@ -349,6 +349,46 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
             %Makes the current meal tray the final meal tray of the order
             self.totalMealCount = self.currentMealCount + 1
         end
+
+        function WorkerRestockTrays(self)
+            self.dobot.AddCollidables(self.chefPerson(5));
+            self.e05Robot.AddCollidables(self.chefPerson(5));
+            self.chefPerson(5).move(transl(1.8, 2.8,-0.2))
+            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,-pi/2))
+             %moves chef to storage rack
+            for i = 1:self.steps  
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,4.5/self.steps,0)*rpy2tr(0,0,-pi/2/self.steps))
+                pause(0.02)
+            end
+            for i = 1:self.steps   
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,3.7/self.steps,0)*rpy2tr(0,0,-pi/12/self.steps))
+                pause(0.02)
+            end
+            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,-pi/2))
+            for i = 1:self.steps   
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,1.5/self.steps,0))
+                pause(0.02)
+            end
+            %Worker fills in trays
+            self.trays = self.trayStorage.AddTrays(7);
+
+            %return home, invert previous steps
+            for i = 1:self.steps
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-1.5/self.steps,0))
+                pause(0.02)
+            end
+            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,pi/2))
+            for i = 1:self.steps  
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-3.7/self.steps,0)*rpy2tr(0,0,pi/12/self.steps))
+                pause(0.02)
+            end
+            for i = 1:self.steps   
+                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-4.5/self.steps,0)*rpy2tr(0,0,pi/2/self.steps))
+                pause(0.02)
+            end
+            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,pi/2))
+        end
+
 
         function Reset(self)
             %used to reset system after an order of meals have been created
