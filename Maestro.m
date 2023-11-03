@@ -22,7 +22,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         e05PlannedPath; % Where the robot wants to go
         e05ItemHold;    % What item the robot is holding
         e05Placement;   % What item the robot will place grasped item on
-        steps = 30;     % Number of steps animations take
+        steps = 15;     % Number of steps animations take
 
         % conveyor trackinf variables
         conveyorCurrentPushCount; %how many times the conveyor has pushed during a procedure
@@ -49,9 +49,14 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         % variables unique to the Maestro class
         procedure;      % The robot starts are procedure 1 to begin, goes from 1 - 7
         % steps;
+        %different stops for the syste
         eButton;            % Called eButton as eStop is inherited from Environment Class
         lightSensor;        % From light sensor
         controlPause;       %used by gui to pause the system. set to 1 if system is paused
+
+        %TrayWorker Variables
+        TrayWorkerPath;
+
     end
 
     % The master code that runs all the main robot tasks
@@ -60,9 +65,11 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
             %update collision checking for robots
             %self.dobot.AddCollidables(self.chefPerson);
             %self.e05Robot.AddCollidables(self.chefPerson);
+            self.e05Robot.AddCollidables(self.chefPerson(4));
             self.eButton = 0;
             self.controlPause = 0;
             self.lightSensor = 0;
+            self.e05Robot.AnimateGripper(1,5)
             self.UpdateConveyorPushDistance();
             self.Reset()
             disp('Maestro: System ready, lets make some meals!')
@@ -133,14 +140,11 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
 
                 elseif (self.procedure <= 7 && not(self.procedure == 1))
                     disp(['Maestro: Moving arms for procedure: ', num2str(self.procedure)])
+                    check(1) = 0;
                     for i = self.robotsCurrentStep:self.robotsPathLength
                         if self.currentMealCount < self.totalMealCount    %If not making the last meal tray
                             if (self.procedure == 2 || self.procedure == 4 || self.procedure == 5 || self.procedure == 7) %procedures where only robot need to be animated
                                 check(1) = self.e05Robot.AnimateArm(self.e05PlannedPath(i,:));
-                                if  (self.procedure == 2 && self.conveyorCurrentPushCount == self.conveyorTotalPushCount )
-                                    disp('Maestro: Deploying worker to refill trays')
-
-                                end
                             else
                                 check(1) = self.e05Robot.AnimateArm(self.e05PlannedPath(i,:),self.e05ItemHold{1});
                             end
@@ -162,13 +166,6 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
                             break
                         end
                     end
-                    % if self.currentMealCount < self.totalMealCount  %control gripper on e05
-                    %     if (self.procedure == 2 || self.procedure == 4 || self.procedure == 5 || self.procedure == 7)
-                    %         self.e05Robot.AnimateGripper(0.75,15);%open gripper;
-                    %     else
-                    %         self.e05Robot.AnimateGripper(1,15);%close gripper
-                    %     end
-                    % end
 
                     if self.robotsCurrentStep == self.robotsPathLength
                         if self.procedure == 7
@@ -198,8 +195,10 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         end
 
 
+
         function PlanProcedure(self)
             if self.eButton == 0 && self.lightSensor == 0 && self.e05Robot.power == 1 && self.dobot.power == 1 && self.controlPause == 0   %if system has not been stopped
+                check(1) = 0;
                 %Updates the planning path that the arms and conveyor belts
                 disp(['Maestro: Planning Procedures for loop ', num2str(self.currentMealCount),'/',num2str(self.totalMealCount)])
                 if self.procedure == 1  %Places feed onto conveyor
@@ -344,51 +343,62 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
             self.bJuiceConveyor.setPushDistance(0.032*30/self.steps);
             self.trayConveyor.setPushDistance(-0.029*30/self.steps);
         end
-        
+
         function WrapUpOrder(self)
             %Makes the current meal tray the final meal tray of the order
             self.totalMealCount = self.currentMealCount + 1
         end
 
-        function WorkerRestockTrays(self)
-            self.dobot.AddCollidables(self.chefPerson(5));
-            self.e05Robot.AddCollidables(self.chefPerson(5));
-            self.chefPerson(5).move(transl(1.8, 2.8,-0.2))
-            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,-pi/2))
-             %moves chef to storage rack
-            for i = 1:self.steps  
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,4.5/self.steps,0)*rpy2tr(0,0,-pi/2/self.steps))
-                pause(0.02)
-            end
-            for i = 1:self.steps   
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,3.7/self.steps,0)*rpy2tr(0,0,-pi/12/self.steps))
-                pause(0.02)
-            end
-            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,-pi/2))
-            for i = 1:self.steps   
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,1.5/self.steps,0))
-                pause(0.02)
-            end
-            %Worker fills in trays
-            self.trays = self.trayStorage.AddTrays(7);
-
-            %return home, invert previous steps
+        function UpdateWorkerRestockTraysPath(self)
+            %gets the path to move chefperson(5) from starting position to
+            %tray storage
+            self.TrayWorkerPath = zeros(2*self.steps,3);
             for i = 1:self.steps
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-1.5/self.steps,0))
-                pause(0.02)
+                self.TrayWorkerPath(i,1:3) = [4.5 (1-4*i/self.steps) -0.2]; %interpolate y position
             end
-            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,pi/2))
-            for i = 1:self.steps  
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-3.7/self.steps,0)*rpy2tr(0,0,pi/12/self.steps))
-                pause(0.02)
+            for i = self.steps:2*self.steps
+                self.TrayWorkerPath(i,1:3) = [(4.5-(2*i)/(2*self.steps)) -3 -0.2]; %interpolate x position
             end
-            for i = 1:self.steps   
-                self.chefPerson(5).move(self.chefPerson(5).base*transl(0,-4.5/self.steps,0)*rpy2tr(0,0,pi/2/self.steps))
-                pause(0.02)
-            end
-            self.chefPerson(5).move(self.chefPerson(5).base*rpy2tr(0,0,pi/2))
         end
 
+        function WorkerEnterWorkspace(self)
+            self.UpdateWorkerRestockTraysPath
+            for i = 1:length(self.TrayWorkerPath)
+                self.chefPerson(5).move(transl(self.TrayWorkerPath(i,:)))
+                self.lightCurtainCheck(self.chefPerson(5),'in')
+                pause(0.1)
+            end
+        end
+        
+                
+        function WorkerLeaveWorkspace(self)
+            self.UpdateWorkerRestockTraysPath
+            for i = length(self.TrayWorkerPath):-1:1
+                self.lightCurtainCheck(self.chefPerson(5),'out')
+                self.chefPerson(5).move(transl(self.TrayWorkerPath(i,:)))
+                pause(0.1)
+            end
+            self.ContinueOrder()
+        end
+
+        function lightCurtainCheck(self,item,direction)
+            %Perform collision checking between lightcurtain and 'item',
+            %for soft stopping the system
+            %use 'in' If item is going in to workspace, and 'out' if item is going
+            %out of workspace
+            if strncmpi(direction,'in',2)
+                if  CollisionDetection.itemsIsCollision(item,self.lightCurtain)
+                    disp('Maestro: Light curtain has detected object entering workspace, Signaling soft stop')
+                    self.lightSensor = 1;
+                end
+            elseif strncmpi(direction,'out',2)
+                if  CollisionDetection.itemsIsCollision(item,self.lightCurtain)
+                    disp('Maestro: Light curtain has detected object leaving workspace, removing soft stop')
+                    self.lightSensor = 0;
+                end
+            else
+            end
+        end
 
         function Reset(self)
             %used to reset system after an order of meals have been created
