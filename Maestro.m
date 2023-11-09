@@ -346,7 +346,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
 
         function WrapUpOrder(self)
             %Makes the current meal tray the final meal tray of the order
-            self.totalMealCount = self.currentMealCount + 1
+            self.totalMealCount = self.currentMealCount + 1;
         end
 
         function UpdateWorkerRestockTraysPath(self)
@@ -366,6 +366,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
             for i = 1:length(self.TrayWorkerPath)
                 self.chefPerson(5).move(transl(self.TrayWorkerPath(i,:)))
                 self.lightCurtainCheck(self.chefPerson(5),'in')
+                self.lightSensor = 1;
                 pause(0.1)
             end
         end 
@@ -375,6 +376,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
             for i = length(self.TrayWorkerPath):-1:1
                 self.lightCurtainCheck(self.chefPerson(5),'out')
                 self.chefPerson(5).move(transl(self.TrayWorkerPath(i,:)))
+                self.lightSensor = 0;
                 pause(0.1)
             end
             self.ContinueOrder()
@@ -390,7 +392,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
                     disp('Maestro: Light curtain has detected object entering workspace, Signaling soft stop')
                     self.lightSensor = 1;
                 end
-            elseif strncmpi(direction,'out',2)
+            elseif strncmpi(direction,'out',3)
                 if  CollisionDetection.itemsIsCollision(item,self.lightCurtain)
                     disp('Maestro: Light curtain has detected object leaving workspace, removing soft stop')
                     self.lightSensor = 0;
