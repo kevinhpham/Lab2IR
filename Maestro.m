@@ -368,8 +368,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
                 self.lightCurtainCheck(self.chefPerson(5),'in')
                 pause(0.1)
             end
-        end
-        
+        end 
                 
         function WorkerLeaveWorkspace(self)
             self.UpdateWorkerRestockTraysPath

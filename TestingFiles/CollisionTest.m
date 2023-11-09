@@ -38,10 +38,12 @@ surf([3,3;3,3] ...
       ,'FaceColor','texturemap');
 
 e05Table = MealRobotTable(transl(0,0,-0.2));
+Tray = Tray(worker.robot.model.fkineUTS(worker.GetPos)*rpy2tr(pi/2,pi/2,0));
+
 
 %Moving arm with collision checking
 for i = 1: steps
-    result(i) = worker.AnimateArm(qpath(i,:));
+    result(i) = worker.AnimateArm(qpath(i,:),Tray);
     if(result(i)==1)
         disp('Robot Worker is about to collide, stopping arm.')
         break
@@ -64,13 +66,15 @@ end
 q0 = worker.robot.model.getpos();
 qf = [-2*pi pi/2 0 0 0 0];
 qpath = jtraj(q0,qf,60);
-
 %Moving arm with collision checking
 for i = 1: steps
-    result(i) = worker.AnimateArm(qpath(i,:));
+    result(i) = worker.AnimateArm(qpath(i,:),Tray);
     if(result(i)==1)
         disp('Robot Worker is about to collide, stopping arm.')
         break
     end
     pause(0)
 end
+
+chef.hitBox.plotBox()
+chef2.hitBox.plotBox()
