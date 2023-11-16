@@ -3,7 +3,7 @@ hold on
 clear
 close
 steps = 10;
-MakeMeal(steps)
+CollisionTest(steps);
 
 end
 function MakeMeal(steps)
@@ -35,7 +35,7 @@ function MakeMeal(steps)
      trayConveyor.setPushDistance(-0.029*30/steps) 
     
      %Setup movable items
-     trays = num2cell(trayStorage.addTrays(8));
+     trays = num2cell(trayStorage.AddTrays(8));
      pushables = {};
      pushables = horzcat(pushables,trays); %Fill rack up with trays
                                                      
@@ -186,26 +186,27 @@ function CollisionTest(steps)
      trayConveyor.setPushDistance(-0.050*30/steps) 
     
      %Setup movable items
-     trays = num2cell(trayStorage.addTrays(1));
+     trays = num2cell(trayStorage.AddTrays(1));
      pushables = {};
      pushables = horzcat(pushables,trays); %Fill rack up with trays
 
     %showing off collision checking
     tasty = MealBox(mealConveyor(1).base,'m');
-    dumbo = ChefPerson(mealConveyor(1).base*transl(0,0,0.5));                   %place dumbo on conveyor
+    dumbo = ChefPerson(mealConveyor(1).base*transl(0.2,0,0.5));                   %place dumbo on conveyor
     pushables = horzcat(pushables,num2cell(dumbo),num2cell(tasty));              %make dumbo pushable
-     for step = 1:60
+    axis equal
+     for step = 1:30
          mealConveyor(1).push(pushables);
          %dumbo.hitBox.plotBox()    %plots hitbox of dumbo
-            pause(0.0)
+            pause(0.05)
      end
-     e05qPath = worker.planMidPickPath(tasty,40);  %plan path to pickup tasty
-     worker.addCollidables([dumbo])                  %MAKE arm do collision checking on dumbo
+     e05qPath = worker.PlanPickupPath(tasty,60)  %plan path to pickup tasty
+     worker.AddCollidables([dumbo])                  %MAKE arm do collision checking on dumbo
     for step = 1:length(e05qPath)
-         result = worker.animateArm(e05qPath(step,:)); %animate arm
+         result = worker.AnimateArm(e05qPath(step,:)); %animate arm
+        pause(0.05)
          if result == 1 %stop animating arm with collision
              break
          end
-         pause(0)
     end
 end

@@ -22,7 +22,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
         e05PlannedPath; % Where the robot wants to go
         e05ItemHold;    % What item the robot is holding
         e05Placement;   % What item the robot will place grasped item on
-        steps = 15;     % Number of steps animations take
+        steps = 10;     % Number of steps animations take
 
         % conveyor trackinf variables
         conveyorCurrentPushCount; %how many times the conveyor has pushed during a procedure
@@ -128,7 +128,7 @@ classdef Maestro <RobotWorkSpace %Inherits from Environment
                             warning(msg)
                             break
                         end
-                        pause(0.02)
+                        pause(0.01)
                     end
 
                     if self.conveyorCurrentPushCount == self.conveyorTotalPushCount

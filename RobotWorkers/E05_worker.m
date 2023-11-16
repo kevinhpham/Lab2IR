@@ -148,7 +148,7 @@ classdef E05_worker <handle
                  %Add aapproach path
                 q0 = qPath1(length(qPath1),:);
                 disp(['E05_Worker: Looking for 2nd midwaypoint to pick up ', item.plyFile]);
-                qPath2 = self.SearchPickup(item,q0,0.3,steps); %Finds midpoint position
+                qPath2 = self.SearchPickup(item,q0,0.3,steps); %Finds approach position
                 %Add pickup path
                 disp(['E05_Worker: Looking for endpoint to pick up ', item.plyFile]);
                 q0 = qPath2(length(qPath2),:);
